@@ -1,210 +1,241 @@
-# ARIA-Gig / GigGuard
-## Invisible Loss Insurance for Delivery Partners
+# ⚡ ARIA GigGuard
 
-> Automatically detecting and compensating gig workers for income lost due to weather, pollution, demand collapse, and fuel price spikes — without claims, without delays.
+### Real-Time Income Protection Engine for Gig Workers
 
----
-
-## 🎯 Problem Statement
-
-Delivery partners on Swiggy, Zomato, and similar platforms suffer daily **invisible income loss** from:
-
-| Factor | Impact | Traditional Insurance |
-|--------|--------|----------------------|
-| Heavy rainfall | Unrideable hours, lost orders | ❌ Not covered |
-| High AQI/Pollution | Health risk, forced stops | ❌ Not covered |
-| Demand fluctuations | Platform-level order collapse | ❌ Not covered |
-| Fuel price spikes | Eroded margins | ❌ Not covered |
-| Geopolitical effects | Iran-Israel → oil prices → fuel → demand | ❌ Not covered |
-
-**GigGuard solves this with parametric, automatic compensation.**
+> **“This is not insurance. This is a real-time income protection system.”**
 
 ---
 
-## 🧠 Core Models
+## 🚨 The Problem
 
-### 1. Workability Index (0–100)
-```
-Score = 100 - WeatherPenalty - AQIPenalty - FuelPenalty - DemandPenalty
-Trigger: Score < 50 → Payout eligible
-```
+India’s gig workers (Swiggy, Zomato, Blinkit, etc.) lose **20–30% of their income** due to:
 
-### 2. Earnings Deficit Index (EDI)
-```
-EDI = Expected Daily Earnings − Actual Daily Earnings
-EDI% = (EDI / Expected) × 100
-```
+* 🌧️ Extreme weather (rain, floods, heatwaves)
+* 🚧 Local disruptions (curfews, protests)
+* 🌫️ Environmental risks (pollution spikes)
 
-### 3. Causation Model
-```
-Causation = 0.40 × Environment
-          + 0.30 × Peer Trends
-          + 0.30 × Demand
-          − 0.25 × Individual Deviation
-
-Score > 0.60 → Systemic loss → Payout eligible
-```
-
-### 4. Payout Tiers
-| Tier | Loss Range | Payout Rate |
-|------|-----------|-------------|
-| T1   | 20–35%    | 50% of deficit |
-| T2   | 35–55%    | 65% of deficit |
-| T3   | 55–75%    | 75% of deficit |
-| T4   | 75–100%   | 85% of deficit |
-
-### 5. Weekly Premiums
-| Risk Tier | Weekly | Monthly |
-|-----------|--------|---------|
-| Low       | ₹30    | ₹120   |
-| Medium    | ₹50    | ₹200   |
-| High      | ₹70    | ₹280   |
+👉 Today, **they bear 100% of the loss** — no safety net, no protection.
 
 ---
 
-## 📁 Project Structure
+## 💡 Our Solution
 
-```
-aria-gig/
-├── backend/
-│   ├── main.py                    # FastAPI app entry point
-│   ├── requirements.txt
-│   ├── models/
-│   │   └── risk_models.py         # Pydantic data models
-│   ├── routers/
-│   │   ├── risk.py                # Risk assessment endpoints
-│   │   ├── policy.py              # Policy management
-│   │   ├── analytics.py           # Dashboard analytics
-│   │   ├── admin.py               # Admin pool management
-│   │   └── payout.py              # Payout history
-│   ├── services/
-│   │   ├── risk_engine.py         # ⭐ Core risk computation
-│   │   ├── external_apis.py       # Weather + market data
-│   │   └── risk_pool.py           # Insurance fund management
-│   └── utils/
-│       └── seed_data.py           # Database seeding
-├── frontend/
-│   └── src/                       # React 18 + Vite
-├── docs/
-│   └── API.md                     # Full API documentation
-├── .env.example
-└── README.md
-```
+**ARIA GigGuard** is an **AI-powered parametric protection engine** that:
+
+* Detects real-world disruptions in real time
+* Quantifies income loss instantly
+* Automatically triggers payouts
+* Requires **zero claims, zero paperwork**
 
 ---
 
-## 🚀 Quick Start
+## 🎯 Core Idea
 
-### Backend (FastAPI)
-
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-cp ../.env.example .env
-# Add your OPENWEATHER_API_KEY to .env
-uvicorn main:app --reload --port 8000
-```
-
-API docs: http://localhost:8000/docs
-
-### Frontend (React + Vite)
-
-```bash
-cd frontend
-npm install
-cp ../.env.example .env.local
-# Set VITE_API_BASE_URL=http://localhost:8000
-npm run dev
-```
+> Instead of “filing a claim”,
+> the system detects income loss and **protects workers automatically**.
 
 ---
 
-## 🌐 Deployment
+## 🔥 Key Features
 
-### Backend → Railway / Render
+### 🎬 Cinematic Simulation Engine
 
-```bash
-# railway.toml
-[build]
-  builder = "NIXPACKS"
-  buildCommand = "pip install -r requirements.txt"
+* Trigger events like:
 
-[deploy]
-  startCommand = "uvicorn main:app --host 0.0.0.0 --port $PORT"
-```
+  * Heavy Rain 🌧️
+  * Flash Flood 🌊
+  * Curfew 🚫
+  * Heatwave 🔥
+* Watch:
 
-Environment variables to set:
-- `OPENWEATHER_API_KEY`
-- `ENVIRONMENT=production`
-
-### Frontend → Vercel
-
-```bash
-npm i -g vercel
-cd frontend
-vercel --prod
-```
-
-Set in Vercel dashboard:
-- `VITE_API_BASE_URL` = your Railway/Render URL
+  * Risk score increase
+  * Earnings drop
+  * Income gap emerge
+  * Auto payout triggered
 
 ---
 
-## 📡 Key API Endpoints
+### 📉 Income Shock Visualizer (Signature Feature)
 
-```
-POST /api/v1/risk/assess           # Full risk assessment
-GET  /api/v1/risk/workability      # Live workability score
-GET  /api/v1/risk/stress-test      # Economic stress simulation
-GET  /api/v1/risk/payout-tiers     # Tier configuration
-GET  /api/v1/policy/{id}           # Partner policy details
-GET  /api/v1/admin/pool            # Risk pool health
-GET  /api/v1/analytics/dashboard   # Weekly analytics
-```
+* Real-time graph:
+
+  * Expected vs Actual Earnings
+  * Highlighted **income gap**
+* Example:
+
+  > Ravi lost ₹380 today. We protected ₹247 instantly.
 
 ---
 
-## 🌍 Economic Stress Mode
+### ⚡ Zero-Touch Claim System
 
-Toggle **High Economic Stress Mode** to simulate geopolitical disruption:
+* No manual claims
+* No approvals
+* No delays
 
-- Fuel prices surge 15–25% (Iran-Israel conflict simulation)
-- Order demand drops 30–35% 
-- AQI increases 30% (less rain, more dust)
-- Workability Score drops below 42
-- Causation score rises above 0.75
-- T3/T4 payouts auto-trigger
+✅ Disruption detected → Loss calculated → Payout credited instantly
 
 ---
 
-## 🛡️ Coverage Rules
+### 🧠 Explainable AI Pricing
 
-**Covered:**
-- Income loss from weather/AQI/demand/fuel spikes (systemic)
+Transparent premium breakdown:
 
-**Excluded:**
-- Voluntary platform absence
-- Platform ban/deactivation
-- Vehicle mechanical failure
-- Direct war damage
-- Direct pandemic illness (economic effects covered)
+* Base premium
+* Weather risk
+* Location risk
+* Behavioral discount
 
----
-
-## 🔧 Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Backend | Python 3.11, FastAPI, NumPy, Pandas |
-| Frontend | React 18, Recharts, Tailwind CSS, Lucide |
-| Weather API | OpenWeatherMap (with realistic fallback) |
-| Deployment | Railway (backend), Vercel (frontend) |
-| Data | JSON file store (upgradeable to PostgreSQL) |
+👉 Builds trust through **AI explainability**
 
 ---
 
-## 📄 License
+### 🔍 Intelligent Fraud Detection
 
-MIT © ARIA-Gig / GigGuard 2024
+AI-driven anomaly detection:
+
+* GPS spoofing detection
+* Fake weather claims
+* Behavioral inconsistencies
+
+Outputs:
+
+* Fraud confidence score
+* Decision (Approved / Rejected)
+* Reasoning for transparency
+
+---
+
+### 🧮 Dynamic Risk Pool System
+
+* Community-driven fund model:
+
+  * Risk Pool
+  * Community Fund
+  * Savings Pool
+
+👉 Transparent payout logic:
+
+> Pool ÷ Affected Riders = Per Rider Compensation
+
+---
+
+### 📊 Dual Dashboard System
+
+#### 👤 Worker View
+
+* Earnings protected
+* Weekly coverage
+* Payout history
+* Cashback tracking
+
+#### 🧑‍💼 Admin View
+
+* Loss ratios
+* Fraud insights
+* Region-wise risk heatmaps
+* Predictive analytics
+
+---
+
+### 🔮 Predictive Risk Forecasting
+
+* Next 7-day disruption probability
+* Suggested premium adjustments
+* Expected payout exposure
+
+---
+
+## 🧪 Demo Flow (What to Show Judges)
+
+1. 👤 Ravi onboarded (delivery partner)
+2. 📊 System shows normal earnings
+3. ⚡ Trigger “Heavy Rain”
+4. 📉 Income gap appears in real-time
+5. 🧠 AI detects disruption
+6. 🔍 Fraud checks executed
+7. 💸 ₹247 credited automatically
+
+> **No claim. No delay. No paperwork. Just protection.**
+
+---
+
+## 🏗️ Tech Stack
+
+### Frontend
+
+* HTML / CSS / JavaScript
+* Interactive charts & visualizations
+* Real-time simulation UI
+
+### Backend
+
+* Python (FastAPI)
+* Risk Engine
+* Insurance Engine
+* Fraud Detection Modules
+
+### Data (Simulated / Mock APIs)
+
+* Weather (IMD-like simulation)
+* Traffic & demand patterns
+* Platform activity
+
+---
+
+## 📦 System Architecture
+
+* **Risk Engine** → Calculates disruption probability
+* **Insurance Engine** → Computes payouts
+* **Fraud Engine** → Validates claims automatically
+* **Simulation Engine** → Drives real-time demo
+
+---
+
+## 📈 Business Model
+
+* Weekly micro-premium (₹30–₹70)
+* Community pooled risk
+* Dynamic pricing based on hyperlocal risk
+
+👉 Sustainable with:
+
+* Controlled loss ratios
+* Predictive pricing
+* Fraud minimization
+
+---
+
+## 🌍 Impact
+
+* Protects gig workers from unpredictable income shocks
+* Enables financial stability in uncertain environments
+* Scales across cities, platforms, and worker types
+
+---
+
+## 🚀 Future Scope
+
+* Real API integrations (weather, mobility data)
+* UPI-based instant payouts
+* Platform partnerships (Swiggy, Zomato, etc.)
+* Personalized risk models per worker
+
+---
+
+## 🏁 Final Statement
+
+> **Ravi didn’t file a claim.
+> The system protected him automatically.**
+
+---
+
+## 👨‍💻 Team
+
+Built with precision, intelligence, and empathy to redefine insurance as **real-time financial protection**.
+
+---
+
+## ⭐ If you like this project
+
+Give it a star ⭐ — and help us protect the people who power our cities.
