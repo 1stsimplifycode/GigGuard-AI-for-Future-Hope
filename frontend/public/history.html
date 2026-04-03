@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GigGuard – History & Cashback</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#0a0f1e;--navy2:#111827;--blue:#1e6fff;--blue-light:#3d8bff;--orange:#ff6b2b;--green:#00d68f;--red:#ff4757;--yellow:#ffd166;--card:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);--text:#e8eaf0;--muted:#7a8096;--white:#ffffff;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;display:flex;}
+  .sidebar{width:240px;background:var(--navy2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:28px 0;position:fixed;top:0;left:0;bottom:0;z-index:50;}
+  .sidebar-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--white);padding:0 24px 28px;border-bottom:1px solid var(--border);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .sidebar-logo span{color:var(--orange);}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:13px 24px;color:var(--muted);cursor:pointer;transition:all 0.2s;font-size:0.9rem;border-left:3px solid transparent;text-decoration:none;}
+  .nav-item:hover{color:var(--white);background:var(--card);}
+  .nav-item.active{color:var(--white);background:rgba(30,111,255,0.1);border-left-color:var(--blue);}
+  .nav-item .icon{font-size:1rem;width:20px;text-align:center;}
+  .sidebar-bottom{margin-top:auto;padding:16px 24px;border-top:1px solid var(--border);}
+  .rider-mini{display:flex;align-items:center;gap:10px;}
+  .rider-avatar{width:36px;height:36px;background:linear-gradient(135deg,var(--blue),var(--orange));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+  .rider-mini-name{font-size:0.85rem;color:var(--white);font-weight:500;}
+  .rider-mini-sub{font-size:0.72rem;color:var(--muted);}
+  .main{margin-left:240px;flex:1;padding:32px;}
+  .page-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;color:var(--white);margin-bottom:4px;}
+  .page-sub{color:var(--muted);font-size:0.87rem;margin-bottom:24px;}
+
+  /* INCOME BANNER */
+  .income-banner{background:rgba(0,214,143,0.05);border:1px solid rgba(0,214,143,0.15);border-radius:12px;padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  .ib-left{display:flex;align-items:center;gap:10px;}
+  .ib-label{font-size:0.83rem;color:var(--muted);}
+  .ib-val{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--green);margin-top:1px;}
+  .ib-right{display:flex;gap:20px;flex-wrap:wrap;}
+  .ib-stat{text-align:right;}
+  .ib-stat-l{font-size:0.68rem;color:var(--muted);}
+  .ib-stat-v{font-size:0.83rem;font-weight:600;margin-top:1px;}
+
+  .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+  .sc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 16px;}
+  .sc-l{font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;}
+  .sc-v{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:var(--white);}
+  .sc-s{font-size:0.72rem;margin-top:3px;}
+
+  .layout{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;}
+  .card-title{font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;color:var(--white);margin-bottom:18px;}
+
+  .h-table{width:100%;border-collapse:collapse;}
+  .h-table th{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;padding:0 0 10px;text-align:left;border-bottom:1px solid var(--border);font-weight:600;}
+  .h-table td{padding:14px 0;font-size:0.82rem;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;}
+  .h-table tr:last-child td{border-bottom:none;}
+  .edot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px;}
+  .pill{padding:3px 9px;border-radius:50px;font-size:0.68rem;font-weight:600;}
+  .p-green{background:rgba(0,214,143,0.15);color:var(--green);}
+  .p-blue{background:rgba(30,111,255,0.15);color:var(--blue-light);}
+  .p-yellow{background:rgba(255,209,102,0.15);color:var(--yellow);}
+
+  /* CHART */
+  .chart-wrap{display:flex;align-items:flex-end;gap:8px;height:100px;margin-top:16px;}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+  .bar-b{width:100%;border-radius:5px 5px 0 0;}
+  .bar-lbl{font-size:0.64rem;color:var(--muted);}
+
+  /* CASHBACK */
+  .cb-circle{text-align:center;padding:12px 0;}
+  .cb-num{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--orange);margin-top:8px;}
+  .cb-lbl{font-size:0.77rem;color:var(--muted);}
+  .cb-rows{margin-top:14px;display:flex;flex-direction:column;gap:0;}
+  .cb-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:0.8rem;}
+  .cb-row:last-child{border-bottom:none;}
+  .cb-key{color:var(--muted);}
+  .cb-val{font-weight:600;}
+
+  .bonus-card{background:linear-gradient(135deg,rgba(255,107,43,0.1),rgba(255,142,90,0.05));border:1px solid rgba(255,107,43,0.2);border-radius:12px;padding:16px;margin-top:16px;display:flex;align-items:center;gap:12px;}
+  .bc-icon{font-size:1.7rem;}
+  .bc-title{font-family:'Syne',sans-serif;font-size:0.87rem;font-weight:700;color:var(--white);}
+  .bc-sub{font-size:0.75rem;color:var(--muted);margin-top:2px;}
+
+  .pool-health{margin-top:0;display:flex;flex-direction:column;gap:14px;}
+  .ph-row{}
+  .ph-top{display:flex;justify-content:space-between;margin-bottom:5px;font-size:0.78rem;}
+  .ph-k{color:var(--muted);}
+  .ph-v{font-weight:600;}
+  .ph-bar{height:5px;background:var(--border);border-radius:4px;overflow:hidden;}
+  .ph-fill{height:100%;border-radius:4px;}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sidebar-logo">🛡️ Gig<span>Guard</span></div>
+  <a class="nav-item" href="dashboard.html"><span class="icon">📊</span> Dashboard</a>
+    <a class="nav-item" href="demo.html"><span class="icon">🎬</span> Demo Engine</a>
+  <a class="nav-item" href="fraud.html"><span class="icon">🔍</span> Fraud Detection</a>
+  <a class="nav-item" href="simulation.html"><span class="icon">⚡</span> Payout Simulation</a>
+  <a class="nav-item active" href="history.html"><span class="icon">📋</span> History & Cashback</a>
+  <a class="nav-item" href="home.html"><span class="icon">🏠</span> Home</a>
+  <div class="sidebar-bottom">
+    <div class="rider-mini">
+      <div class="rider-avatar">🏍️</div>
+      <div>
+        <div class="rider-mini-name" id="sidebar-name">Rahul Kumar</div>
+        <div class="rider-mini-sub" id="sidebar-city">Chennai · Swiggy</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-title">📋 History & Cashback</div>
+  <div class="page-sub">Transparent record — every rupee you paid, every rupee you got back</div>
+
+  <!-- INCOME BANNER -->
+  <div class="income-banner">
+    <div class="ib-left">
+      <div>
+        <div class="ib-label">Your Auto-Fetched Daily Income</div>
+        <div class="ib-val" id="ib-income">₹700 / day</div>
+      </div>
+    </div>
+    <div class="ib-right">
+      <div class="ib-stat">
+        <div class="ib-stat-l">Source</div>
+        <div class="ib-stat-v" id="ib-source" style="color:var(--blue-light)">Swiggy API ✓</div>
+      </div>
+      <div class="ib-stat">
+        <div class="ib-stat-l">Zone</div>
+        <div class="ib-stat-v" id="ib-zone" style="color:var(--white)">600001</div>
+      </div>
+      <div class="ib-stat">
+        <div class="ib-stat-l">Payout Per Day</div>
+        <div class="ib-stat-v" id="ib-payout" style="color:var(--green)">₹700</div>
+      </div>
+      <div class="ib-stat">
+        <div class="ib-stat-l">Premium</div>
+        <div class="ib-stat-v" style="color:var(--blue-light)">₹50 flat</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="summary-grid">
+    <div class="sc"><div class="sc-l">Total Premiums Paid</div><div class="sc-v">₹300</div><div class="sc-s" style="color:var(--muted)">6 weeks × ₹50</div></div>
+    <div class="sc"><div class="sc-l">Total Payouts Received</div><div class="sc-v" id="s-payouts" style="color:var(--green)">₹1,400</div><div class="sc-s" id="s-payouts-sub" style="color:var(--green)">2 disruption events</div></div>
+    <div class="sc"><div class="sc-l">Cashback Earned</div><div class="sc-v" style="color:var(--orange)">₹40</div><div class="sc-s" style="color:var(--muted)">4 clear weeks × ₹10</div></div>
+    <div class="sc"><div class="sc-l">Net Benefit</div><div class="sc-v" id="s-net" style="color:var(--green)">+₹1,140</div><div class="sc-s" id="s-net-sub" style="color:var(--green)">After premium deductions</div></div>
+  </div>
+
+  <div class="layout">
+    <div class="card">
+      <div class="card-title">Full Transaction History</div>
+      <table class="h-table">
+        <tr><th>Week</th><th>Event</th><th>Zone</th><th>Premium</th><th>Payout</th><th>Status</th></tr>
+        <tr>
+          <td style="color:var(--muted)">Mar 17–23</td>
+          <td><span class="edot" style="background:var(--red)"></span>Flood Alert</td>
+          <td style="color:var(--muted);font-size:0.74rem" id="h-pin">600001</td>
+          <td style="color:var(--muted)">₹50</td>
+          <td style="color:var(--green);font-weight:600" id="h-pay1">+₹700</td>
+          <td><span class="pill p-green">Paid</span></td>
+        </tr>
+        <tr>
+          <td style="color:var(--muted)">Mar 10–16</td>
+          <td><span class="edot" style="background:var(--green)"></span>Clear Week</td>
+          <td style="color:var(--muted);font-size:0.74rem" id="h-pin2">600001</td>
+          <td style="color:var(--muted)">₹50</td>
+          <td style="color:var(--blue-light)">Cashback ₹10</td>
+          <td><span class="pill p-blue">Saved</span></td>
+        </tr>
+        <tr>
+          <td style="color:var(--muted)">Mar 3–9</td>
+          <td><span class="edot" style="background:var(--orange)"></span>Heat Wave</td>
+          <td style="color:var(--muted);font-size:0.74rem" id="h-pin3">600001</td>
+          <td style="color:var(--muted)">₹50</td>
+          <td style="color:var(--green);font-weight:600" id="h-pay3">+₹700</td>
+          <td><span class="pill p-green">Paid</span></td>
+        </tr>
+        <tr>
+          <td style="color:var(--muted)">Feb 24–Mar 2</td>
+          <td><span class="edot" style="background:var(--green)"></span>Clear Week</td>
+          <td style="color:var(--muted);font-size:0.74rem" id="h-pin4">600001</td>
+          <td style="color:var(--muted)">₹50</td>
+          <td style="color:var(--blue-light)">Cashback ₹10</td>
+          <td><span class="pill p-blue">Saved</span></td>
+        </tr>
+        <tr>
+          <td style="color:var(--muted)">Feb 17–23</td>
+          <td><span class="edot" style="background:var(--green)"></span>Clear Week</td>
+          <td style="color:var(--muted);font-size:0.74rem" id="h-pin5">600001</td>
+          <td style="color:var(--muted)">₹50</td>
+          <td style="color:var(--blue-light)">Cashback ₹10</td>
+          <td><span class="pill p-blue">Saved</span></td>
+        </tr>
+        <tr>
+          <td style="color:var(--muted)">Feb 10–16</td>
+          <td><span class="edot" style="background:var(--blue)"></span>Heavy Rain</td>
+          <td style="color:var(--muted);font-size:0.74rem" id="h-pin6">600001</td>
+          <td style="color:var(--muted)">₹50</td>
+          <td style="color:var(--green);font-weight:600" id="h-pay6">+₹700</td>
+          <td><span class="pill p-green">Paid</span></td>
+        </tr>
+      </table>
+
+      <div style="margin-top:20px">
+        <div style="font-size:0.77rem;color:var(--muted);margin-bottom:8px">Weekly Payout Chart (₹)</div>
+        <div class="chart-wrap" id="chart"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Cashback Tracker 🎁</div>
+        <div class="cb-circle">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle cx="70" cy="70" r="55" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
+            <circle cx="70" cy="70" r="55" fill="none" stroke="url(#cbG)" stroke-width="10" stroke-linecap="round" stroke-dasharray="345" stroke-dashoffset="241" transform="rotate(-90 70 70)"/>
+            <defs><linearGradient id="cbG" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ff6b2b"/><stop offset="100%" stop-color="#ffd166"/></linearGradient></defs>
+            <text x="70" y="65" text-anchor="middle" fill="white" font-family="Syne" font-size="20" font-weight="800">₹40</text>
+            <text x="70" y="82" text-anchor="middle" fill="#7a8096" font-size="10">earned</text>
+          </svg>
+          <div class="cb-lbl">of ₹120 possible this month</div>
+        </div>
+        <div class="cb-rows">
+          <div class="cb-row"><span class="cb-key">Savings Pool</span><span class="cb-val" style="color:var(--orange)">₹120</span></div>
+          <div class="cb-row"><span class="cb-key">Earned back</span><span class="cb-val" style="color:var(--green)">₹40</span></div>
+          <div class="cb-row"><span class="cb-key">Pending (month end)</span><span class="cb-val" style="color:var(--yellow)">₹80</span></div>
+          <div class="cb-row"><span class="cb-key">Days till payout</span><span class="cb-val">11 days</span></div>
+        </div>
+      </div>
+
+      <div class="bonus-card">
+        <div class="bc-icon">🎯</div>
+        <div>
+          <div class="bc-title">Loyalty Bonus – 2 Weeks Away!</div>
+          <div class="bc-sub">Keep your streak to unlock an extra ₹50 bonus on top of cashback.</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">Pool Health</div>
+        <div class="pool-health">
+          <div class="ph-row">
+            <div class="ph-top"><span class="ph-k">🛡️ Risk Pool</span><span class="ph-v" style="color:var(--blue-light)">₹3,750 / ₹5,000</span></div>
+            <div class="ph-bar"><div class="ph-fill" style="width:75%;background:var(--blue)"></div></div>
+          </div>
+          <div class="ph-row">
+            <div class="ph-top"><span class="ph-k">🤝 Community Fund</span><span class="ph-v" style="color:var(--green)">₹1,250 / ₹2,000</span></div>
+            <div class="ph-bar"><div class="ph-fill" style="width:62%;background:var(--green)"></div></div>
+          </div>
+          <div class="ph-row">
+            <div class="ph-top"><span class="ph-k">💰 Savings Pool</span><span class="ph-v" style="color:var(--orange)">₹120 / ₹400</span></div>
+            <div class="ph-bar"><div class="ph-fill" style="width:30%;background:var(--orange)"></div></div>
+          </div>
+        </div>
+        <div style="margin-top:12px;padding:10px;background:rgba(0,214,143,0.05);border:1px solid rgba(0,214,143,0.1);border-radius:8px;font-size:0.75rem;color:var(--muted)">
+          ✅ Pool is <strong style="color:var(--green)">financially stable</strong>. All payouts fully covered.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const user = JSON.parse(localStorage.getItem('gigguard_user') || '{"name":"Rahul Kumar","city":"Chennai","platform":"Swiggy","income":700,"pin":"600001"}');
+  const income = parseInt(user.income) || 700;
+  const pin = user.pin || '600001';
+
+  document.getElementById('sidebar-name').textContent = user.name || 'Rahul Kumar';
+  document.getElementById('sidebar-city').textContent = (user.city||'Chennai') + ' · ' + (user.platform||'Swiggy');
+  document.getElementById('ib-income').textContent = '₹' + income + ' / day';
+  document.getElementById('ib-source').textContent = (user.platform||'Platform') + ' API ✓';
+  document.getElementById('ib-zone').textContent = pin;
+  document.getElementById('ib-payout').textContent = '₹' + income;
+
+  // Dynamic payouts
+  const totalPayouts = income * 3;
+  document.getElementById('s-payouts').textContent = '₹' + totalPayouts.toLocaleString();
+  document.getElementById('s-payouts-sub').textContent = '3 disruption events × ₹' + income;
+  const net = totalPayouts + 40 - 300;
+  document.getElementById('s-net').textContent = '+₹' + net.toLocaleString();
+  document.getElementById('s-net-sub').textContent = 'After ₹300 premiums deducted';
+
+  // Pin in table
+  ['h-pin','h-pin2','h-pin3','h-pin4','h-pin5','h-pin6'].forEach(id => {
+    document.getElementById(id).textContent = pin;
+  });
+  ['h-pay1','h-pay3','h-pay6'].forEach(id => {
+    document.getElementById(id).textContent = '+₹' + income;
+  });
+
+  // Chart
+  const weeks = [
+    {label:'Feb 10',pay:income,cb:0},
+    {label:'Feb 17',pay:0,cb:10},
+    {label:'Feb 24',pay:0,cb:10},
+    {label:'Mar 3',pay:income,cb:0},
+    {label:'Mar 10',pay:0,cb:10},
+    {label:'Mar 17',pay:income,cb:0},
+  ];
+  const maxH = 84;
+  const chart = document.getElementById('chart');
+  weeks.forEach(w => {
+    const col = document.createElement('div');
+    col.className = 'bar-col';
+    const h = w.pay > 0 ? maxH : 12;
+    const bg = w.pay > 0 ? 'var(--green)' : 'var(--orange)';
+    col.innerHTML = `<div class="bar-b" style="height:${h}px;background:${bg}"></div><div class="bar-lbl">${w.label}</div>`;
+    chart.appendChild(col);
+  });
+</script>
+</body>
+</html>
+<!-- ARIA-Gig sidebar link -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const sidebar = document.querySelector('.sidebar');
+  if (sidebar) {
+    const bottom = sidebar.querySelector('.sidebar-bottom');
+    const ariaLink = document.createElement('a');
+    ariaLink.href = '/';
+    ariaLink.className = 'nav-item';
+    ariaLink.innerHTML = '<span class="icon">🤖</span> ARIA Analytics';
+    ariaLink.style.color = '#ffd166';
+    sidebar.insertBefore(ariaLink, bottom);
+  }
+
+  // Add interactive earnings projection card
+  const main = document.querySelector('.main');
+  if (!main) return;
+  const user = JSON.parse(localStorage.getItem('gigguard_user') || '{}');
+  const income = parseInt(user.income) || 700;
+
+  const projCard = document.createElement('div');
+  projCard.style.cssText = 'margin-top:20px;';
+  projCard.innerHTML = `
+    <div style="background:rgba(0,214,143,0.04);border:1px solid rgba(0,214,143,0.15);border-radius:18px;padding:24px;">
+      <div style="font-family:'Syne',sans-serif;font-size:0.97rem;font-weight:700;color:#fff;margin-bottom:4px;">📈 Income Protection ROI Calculator</div>
+      <div style="font-size:0.78rem;color:#7a8096;margin-bottom:18px;">Adjust annual disruption days to see your net benefit</div>
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
+        <label style="font-size:0.82rem;color:#7a8096;">Disruption days/year:</label>
+        <input type="range" id="disruptDays" min="1" max="60" value="12" style="flex:1;min-width:160px;accent-color:#00d68f;">
+        <span id="disruptVal" style="font-family:'Syne',sans-serif;font-weight:700;color:#00d68f;min-width:30px;text-align:center;">12</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;" id="roiCards"></div>
+    </div>
+  `;
+  main.appendChild(projCard);
+
+  function updateROI() {
+    const days = parseInt(document.getElementById('disruptDays').value);
+    document.getElementById('disruptVal').textContent = days;
+    const annualPremium = 50 * 52;
+    const totalPayouts = income * days;
+    const cashback = Math.max(0, (52 - days) * 10);
+    const net = totalPayouts + cashback - annualPremium;
+    const roi = ((net / annualPremium) * 100).toFixed(0);
+    document.getElementById('roiCards').innerHTML = [
+      { label:'Annual Premium', val:'₹'+annualPremium.toLocaleString(), color:'#3d8bff', sub:'₹50 × 52 weeks' },
+      { label:'Protected Earnings', val:'₹'+totalPayouts.toLocaleString(), color:'#00d68f', sub: days+' disruption days × ₹'+income },
+      { label:'Cashback Earned', val:'₹'+cashback.toLocaleString(), color:'#ff6b2b', sub: (52-days)+' clear weeks × ₹10' },
+      { label:'Net Benefit', val:(net>0?'+':'')+' ₹'+net.toLocaleString(), color: net>=0?'#00d68f':'#ff4757', sub:'ROI: '+roi+'%' },
+    ].map(c => `
+      <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:14px;">
+        <div style="font-size:0.68rem;color:#7a8096;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px;">${c.label}</div>
+        <div style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;color:${c.color};">${c.val}</div>
+        <div style="font-size:0.7rem;color:#7a8096;margin-top:3px;">${c.sub}</div>
+      </div>
+    `).join('');
+  }
+  document.getElementById('disruptDays').addEventListener('input', updateROI);
+  updateROI();
+});
+</script>

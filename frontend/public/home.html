@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GigGuard – Earn Even When You Can't Work</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a0f1e;
+    --navy2: #111827;
+    --blue: #1e6fff;
+    --blue-light: #3d8bff;
+    --orange: #ff6b2b;
+    --orange-light: #ff8c5a;
+    --green: #00d68f;
+    --card: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.08);
+    --text: #e8eaf0;
+    --muted: #7a8096;
+    --white: #ffffff;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--navy);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* BG mesh */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(30,111,255,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(255,107,43,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(0,214,143,0.04) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 40px;
+    background: rgba(10,15,30,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: var(--white);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--blue), var(--orange));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+  }
+  .logo span { color: var(--orange); }
+  nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+  }
+  nav a:hover { color: var(--white); }
+  .nav-links { display: flex; gap: 32px; }
+  .btn-nav {
+    background: var(--blue);
+    color: white !important;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: background 0.2s, transform 0.2s !important;
+  }
+  .btn-nav:hover { background: var(--blue-light) !important; transform: translateY(-1px); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    padding: 100px 20px 60px;
+    position: relative; z-index: 1;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(30,111,255,0.15);
+    border: 1px solid rgba(30,111,255,0.3);
+    border-radius: 50px;
+    padding: 8px 18px;
+    font-size: 0.8rem;
+    color: var(--blue-light);
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero-badge .dot {
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(20px); }
+    to { opacity:1; transform: translateY(0); }
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.4rem, 6vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  .hero h1 .accent { color: var(--orange); }
+  .hero h1 .blue { color: var(--blue-light); }
+  .hero p {
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.7;
+    margin-bottom: 40px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+  .hero-cta {
+    display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--blue), var(--blue-light));
+    color: white;
+    padding: 16px 36px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 8px 30px rgba(30,111,255,0.3);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(30,111,255,0.4); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    padding: 16px 36px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s, background 0.2s;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.2); background: var(--card); }
+
+  /* STATS */
+  .stats-row {
+    display: flex; gap: 40px; justify-content: center; flex-wrap: wrap;
+    margin-top: 60px;
+    animation: fadeUp 0.6s 0.4s ease both;
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--white);
+  }
+  .stat-num span { color: var(--orange); }
+  .stat-label { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+
+  /* HOW IT WORKS */
+  .section {
+    padding: 100px 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative; z-index: 1;
+  }
+  .section-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 14px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 700;
+    margin-bottom: 60px;
+    color: var(--white);
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2px;
+    background: var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+  .step {
+    background: var(--navy2);
+    padding: 36px 28px;
+    transition: background 0.3s;
+    position: relative;
+  }
+  .step:hover { background: rgba(30,111,255,0.08); }
+  .step-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 3rem;
+    font-weight: 800;
+    color: rgba(30,111,255,0.15);
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+  .step-icon { font-size: 1.8rem; margin-bottom: 14px; }
+  .step h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 10px;
+  }
+  .step p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+
+  /* MONEY FLOW */
+  .money-flow {
+    background: var(--navy2);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 48px;
+    margin-top: 40px;
+  }
+  .pool-visual {
+    display: grid;
+    grid-template-columns: 3fr 1fr 1fr;
+    gap: 16px;
+    margin-top: 32px;
+  }
+  .pool-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .pool-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .pool-card.risk::before { background: linear-gradient(90deg, var(--blue), var(--blue-light)); }
+  .pool-card.shg::before { background: linear-gradient(90deg, var(--green), #00a86b); }
+  .pool-card.savings::before { background: linear-gradient(90deg, var(--orange), var(--orange-light)); }
+  .pool-pct {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .pool-card.risk .pool-pct { color: var(--blue-light); }
+  .pool-card.shg .pool-pct { color: var(--green); }
+  .pool-card.savings .pool-pct { color: var(--orange); }
+  .pool-name { font-weight: 600; color: var(--white); margin-bottom: 6px; }
+  .pool-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+
+  /* FEATURES */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+  }
+  .feature-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 28px;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .feature-card:hover { border-color: rgba(30,111,255,0.3); transform: translateY(-4px); }
+  .feature-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    margin-bottom: 18px;
+  }
+  .feature-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 10px;
+  }
+  .feature-card p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+
+  /* CTA SECTION */
+  .cta-section {
+    text-align: center;
+    padding: 80px 20px;
+    position: relative; z-index: 1;
+  }
+  .cta-box {
+    max-width: 700px;
+    margin: 0 auto;
+    background: linear-gradient(135deg, rgba(30,111,255,0.15), rgba(255,107,43,0.1));
+    border: 1px solid rgba(30,111,255,0.2);
+    border-radius: 28px;
+    padding: 60px 40px;
+  }
+  .cta-box h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 800;
+    color: var(--white);
+    margin-bottom: 16px;
+  }
+  .cta-box p { color: var(--muted); margin-bottom: 32px; font-size: 1rem; }
+
+  footer {
+    text-align: center;
+    padding: 30px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border);
+    position: relative; z-index: 1;
+  }
+
+  /* FLOATING RAIN ANIMATION */
+  .rain-drop {
+    position: fixed;
+    top: -20px;
+    width: 2px;
+    background: linear-gradient(to bottom, transparent, rgba(30,111,255,0.3));
+    border-radius: 2px;
+    animation: rain linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+  @keyframes rain {
+    to { transform: translateY(110vh); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Rain animation -->
+<script>
+  for(let i=0;i<18;i++){
+    const d=document.createElement('div');
+    d.className='rain-drop';
+    d.style.left=Math.random()*100+'vw';
+    d.style.height=(40+Math.random()*60)+'px';
+    d.style.animationDuration=(1.5+Math.random()*2)+'s';
+    d.style.animationDelay=Math.random()*3+'s';
+    d.style.opacity=0.3+Math.random()*0.4;
+    document.body.appendChild(d);
+  }
+</script>
+
+<nav>
+  <div class="logo">
+    <div class="logo-icon">🛡️</div>
+    Gig<span>Guard</span>
+  </div>
+  <div class="nav-links">
+    <a href="#how">How it Works</a>
+    <a href="#money">Money Flow</a>
+    <a href="#features">Features</a>
+    <a href="dashboard.html" class="btn-nav">Open Demo →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">
+    <span class="dot"></span>
+    AI-Powered Income Protection for Gig Workers
+  </div>
+  <h1>
+    Earn Even When<br>
+    You <span class="accent">Can't Work</span>
+  </h1>
+  <p>GigGuard automatically pays delivery partners when rain, floods, or extreme weather stops them from working. No forms. No waiting. Just protection.</p>
+  <div class="hero-cta">
+    <a href="onboarding.html" class="btn-primary">🚀 Try the Demo</a>
+    <a href="#how" class="btn-secondary">See How It Works ↓</a>
+  </div>
+  <div class="stats-row">
+    <div class="stat">
+      <div class="stat-num">₹50<span>/wk</span></div>
+      <div class="stat-label">Weekly Premium</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">₹<span>400</span></div>
+      <div class="stat-label">Avg. Payout / Rain Day</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">0<span> clicks</span></div>
+      <div class="stat-label">To Claim</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">100<span>%</span></div>
+      <div class="stat-label">Auto-Verified</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how">
+  <div class="section-label">The Process</div>
+  <div class="section-title">Simple. Automatic. Fair.</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-icon">📝</div>
+      <h3>Register Once</h3>
+      <p>Add your location, platform (Swiggy/Zomato) and daily income. Takes 2 minutes.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-icon">💳</div>
+      <h3>Pay ₹50/Week</h3>
+      <p>A small weekly premium split into 3 smart pools. Auto-deducted from earnings.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-icon">🌦️</div>
+      <h3>AI Watches Weather</h3>
+      <p>Real-time IMD data tracks rain, floods, heat waves in your exact delivery zone.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-icon">⚡</div>
+      <h3>Auto Payout</h3>
+      <p>Unsafe conditions detected → money sent to your account instantly. Zero action needed.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">05</div>
+      <div class="step-icon">🎁</div>
+      <h3>Get Cashback</h3>
+      <p>No disruptions? Your unused premium comes back as bonus at month end.</p>
+    </div>
+  </div>
+</section>
+
+<!-- MONEY FLOW -->
+<section class="section" id="money">
+  <div class="section-label">Transparency</div>
+  <div class="section-title">Where Does Your ₹50 Go?</div>
+  <div class="money-flow">
+    <p style="color:var(--muted); font-size:0.9rem;">Every rupee is tracked. Every pool is visible to you. No black box.</p>
+    <div class="pool-visual">
+      <div class="pool-card risk">
+        <div class="pool-pct">60%</div>
+        <div class="pool-name">🛡️ Risk Pool</div>
+        <div class="pool-desc">₹30 per week goes here. Used to pay riders when weather disruptions hit. This is your income shield.</div>
+      </div>
+      <div class="pool-card shg">
+        <div class="pool-pct">20%</div>
+        <div class="pool-name">🤝 Community Fund</div>
+        <div class="pool-desc">₹10 goes to SHG-inspired shared emergency fund and micro-loans.</div>
+      </div>
+      <div class="pool-card savings">
+        <div class="pool-pct">20%</div>
+        <div class="pool-name">💰 Your Savings</div>
+        <div class="pool-desc">₹10 saved. Returned as cashback if no claims made.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-label">Why GigGuard</div>
+  <div class="section-title">Built Different</div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(30,111,255,0.15)">🤖</div>
+      <h3>AI-Powered Decisions</h3>
+      <p>Workability Score calculated from real-time weather, zone data, and historical patterns. No human bias.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(255,107,43,0.15)">⚡</div>
+      <h3>Zero-Claim System</h3>
+      <p>No forms, no calls, no waiting. If you can't work, you get paid. Automatically.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(0,214,143,0.15)">🎁</div>
+      <h3>Money Never Wasted</h3>
+      <p>Unlike traditional insurance, unused premiums return as cashback. You always win.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(30,111,255,0.15)">📍</div>
+      <h3>Hyperlocal Zones</h3>
+      <p>Payouts based on your specific delivery zone. Rain in one area won't affect riders in clear zones.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(255,107,43,0.15)">🆘</div>
+      <h3>Safety Pause Button</h3>
+      <p>Feel unsafe? Press pause. System verifies and compensates you instead of forcing you to ride in danger.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(0,214,143,0.15)">🔒</div>
+      <h3>Fraud-Proof</h3>
+      <p>GPS verification + activity checks ensure only genuine riders get paid. Fair for everyone.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="cta-box">
+    <h2>See GigGuard in Action</h2>
+    <p>Walk through a live simulation — register as a rider, watch the AI detect a rain event, and see the auto-payout happen in real time.</p>
+    <a href="onboarding.html" class="btn-primary" style="font-size:1.05rem; padding:18px 44px;">Launch Demo →</a>
+  </div>
+</div>
+
+<footer>
+  © 2026 GigGuard · Built for DEV Trails Hackathon · Protecting India's Gig Workers
+</footer>
+
+</body>
+</html>
+<!-- ARIA-Gig Integration Enhancement: inject nav link to React app -->
+<script>
+// Add ARIA-Gig dashboard link to nav dynamically
+document.addEventListener('DOMContentLoaded', () => {
+  const navLinks = document.querySelector('.nav-links');
+  if (navLinks) {
+    const ariaLink = document.createElement('a');
+    ariaLink.href = '/';
+    ariaLink.className = 'btn-nav';
+    ariaLink.style.background = 'linear-gradient(135deg,#ff6b2b,#ffd166)';
+    ariaLink.textContent = '⚡ ARIA-Gig Analytics →';
+    navLinks.insertBefore(ariaLink, navLinks.lastChild);
+  }
+});
+</script>

@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GigGuard – Join Now</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:#0a0f1e; --navy2:#111827; --blue:#1e6fff; --blue-light:#3d8bff;
+    --orange:#ff6b2b; --orange-light:#ff8c5a; --yellow:#ffd166;
+    --green:#00d68f; --red:#ff4757;
+    --card:rgba(255,255,255,0.04); --border:rgba(255,255,255,0.08);
+    --text:#e8eaf0; --muted:#7a8096; --white:#ffffff;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
+  body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 30% 30%,rgba(30,111,255,0.1) 0%,transparent 50%),radial-gradient(ellipse at 70% 70%,rgba(255,107,43,0.06) 0%,transparent 50%);pointer-events:none;}
+  .back-link{position:fixed;top:24px;left:24px;color:var(--muted);text-decoration:none;font-size:0.9rem;display:flex;align-items:center;gap:6px;transition:color 0.2s;z-index:10;}
+  .back-link:hover{color:var(--white);}
+  .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:var(--white);margin-bottom:32px;display:flex;align-items:center;gap:8px;}
+  .logo span{color:var(--orange);}
+  .form-container{background:var(--navy2);border:1px solid var(--border);border-radius:24px;padding:44px;width:100%;max-width:540px;position:relative;z-index:1;}
+
+  /* PROGRESS */
+  .progress-bar{display:flex;gap:6px;margin-bottom:36px;}
+  .prog-step{flex:1;height:4px;background:var(--border);border-radius:4px;transition:background 0.4s;}
+  .prog-step.active{background:var(--blue);} .prog-step.done{background:var(--green);}
+  .step-label{font-size:0.72rem;color:var(--blue-light);font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;}
+  h2{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;color:var(--white);margin-bottom:8px;}
+  .sub{color:var(--muted);font-size:0.88rem;margin-bottom:28px;}
+
+  /* FORM ELEMENTS */
+  .form-group{margin-bottom:18px;}
+  label{display:block;font-size:0.83rem;color:var(--muted);margin-bottom:7px;font-weight:500;}
+  input,select{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;padding:13px 15px;color:var(--white);font-size:0.93rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s,background 0.2s;-webkit-appearance:none;}
+  input:focus,select:focus{border-color:var(--blue);background:rgba(30,111,255,0.08);}
+  select option{background:var(--navy2);}
+
+  /* PLATFORM GRID */
+  .platform-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+  .platform-btn{background:rgba(255,255,255,0.04);border:2px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;text-align:center;transition:all 0.2s;color:var(--text);font-family:'DM Sans',sans-serif;}
+  .platform-btn .icon{font-size:1.7rem;margin-bottom:5px;} .platform-btn .name{font-size:0.85rem;font-weight:600;}
+  .platform-btn.selected{border-color:var(--blue);background:rgba(30,111,255,0.1);color:var(--white);}
+
+  /* DYNAMIC PAYOUT BOX */
+  .dynamic-box{background:rgba(30,111,255,0.06);border:1px solid rgba(30,111,255,0.18);border-radius:14px;padding:18px;margin-top:4px;}
+  .db-title{font-size:0.78rem;font-weight:600;color:var(--blue-light);margin-bottom:12px;display:flex;align-items:center;gap:7px;}
+  .formula-line{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;border-radius:10px;margin-bottom:8px;}
+  .formula-line:last-of-type{margin-bottom:0;}
+  .fl-label{font-size:0.82rem;color:var(--text);display:flex;align-items:center;gap:7px;}
+  .fl-range{font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;}
+  .formula-note{background:rgba(255,209,102,0.07);border:1px solid rgba(255,209,102,0.15);border-radius:10px;padding:11px 13px;font-size:0.76rem;color:var(--muted);line-height:1.65;margin-top:10px;}
+  .formula-note strong{color:var(--yellow);}
+  .formula-note .eq{display:block;margin-top:6px;font-family:'Syne',sans-serif;font-size:0.82rem;color:var(--blue-light);font-weight:600;}
+
+  /* PAYMENT METHOD */
+  .pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px;}
+  .pay-btn{background:rgba(255,255,255,0.04);border:2px solid var(--border);border-radius:12px;padding:14px 12px;cursor:pointer;text-align:center;transition:all 0.2s;color:var(--text);font-family:'DM Sans',sans-serif;}
+  .pay-btn .p-icon{font-size:1.5rem;margin-bottom:5px;}
+  .pay-btn .p-name{font-size:0.82rem;font-weight:600;}
+  .pay-btn .p-sub{font-size:0.68rem;color:var(--muted);margin-top:2px;}
+  .pay-btn.selected{border-color:var(--green);background:rgba(0,214,143,0.08);color:var(--white);}
+  .pay-input-wrap{margin-top:14px;display:none;}
+  .pay-info-box{background:rgba(0,214,143,0.06);border:1px solid rgba(0,214,143,0.15);border-radius:10px;padding:12px 14px;font-size:0.78rem;color:var(--muted);line-height:1.6;margin-top:12px;}
+  .pay-info-box strong{color:var(--green);}
+
+  /* PLAN STEP */
+  .pool-mini{display:grid;grid-template-columns:3fr 1fr 1fr;gap:10px;margin:18px 0;}
+  .pool-mini-card{border-radius:10px;padding:14px 12px;text-align:center;}
+  .pool-mini-card .amt{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;} .pool-mini-card .lbl{font-size:0.68rem;color:var(--muted);margin-top:2px;line-height:1.4;}
+  .pool-mini-card.r{background:rgba(30,111,255,0.1);} .pool-mini-card.r .amt{color:var(--blue-light);}
+  .pool-mini-card.s{background:rgba(0,214,143,0.1);} .pool-mini-card.s .amt{color:var(--green);}
+  .pool-mini-card.c{background:rgba(255,107,43,0.1);} .pool-mini-card.c .amt{color:var(--orange);}
+
+  /* SUMMARY */
+  .summary-row{display:flex;justify-content:space-between;align-items:flex-start;padding:13px 0;border-bottom:1px solid var(--border);}
+  .summary-row:last-child{border-bottom:none;} .summary-key{color:var(--muted);font-size:0.83rem;} .summary-val{color:var(--white);font-weight:500;font-size:0.87rem;text-align:right;max-width:60%;}
+
+  /* BUTTON */
+  .btn-next{width:100%;background:linear-gradient(135deg,var(--blue),var(--blue-light));color:white;padding:15px;border-radius:12px;font-size:0.97rem;font-weight:600;border:none;cursor:pointer;margin-top:22px;transition:opacity 0.2s,transform 0.2s;box-shadow:0 8px 24px rgba(30,111,255,0.25);font-family:'DM Sans',sans-serif;}
+  .btn-next:hover:not([disabled]){transform:translateY(-2px);opacity:0.95;}
+  .btn-next[disabled]{opacity:0.4;cursor:not-allowed;}
+
+  .zone-badge{display:flex;align-items:center;gap:6px;background:rgba(0,214,143,0.08);border:1px solid rgba(0,214,143,0.18);border-radius:8px;padding:8px 12px;font-size:0.76rem;color:var(--green);margin-top:7px;}
+
+  .step-page{display:none;} .step-page.active{display:block;animation:fadeIn 0.35s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<a href="home.html" class="back-link">← Back to Home</a>
+<div class="logo">🛡️ Gig<span>Guard</span></div>
+
+<div class="form-container">
+  <!-- 5-step progress bar -->
+  <div class="progress-bar">
+    <div class="prog-step active" id="p1"></div>
+    <div class="prog-step" id="p2"></div>
+    <div class="prog-step" id="p3"></div>
+    <div class="prog-step" id="p4"></div>
+    <div class="prog-step" id="p5"></div>
+  </div>
+
+  <!-- ── STEP 1: Personal Info ── -->
+  <div class="step-page active" id="step1">
+    <div class="step-label">Step 1 of 5</div>
+    <h2>Hey! Let's get you protected 👋</h2>
+    <p class="sub">Tell us a bit about yourself</p>
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" id="name" placeholder="e.g. Rahul Kumar"/>
+    </div>
+    <div class="form-group">
+      <label>Mobile Number</label>
+      <input type="tel" id="phone" placeholder="+91 98765 43210"/>
+    </div>
+    <div class="form-group">
+      <label>City</label>
+      <select id="city" onchange="onCityChange()">
+        <option value="">Select your city</option>
+        <option>Chennai</option><option>Mumbai</option><option>Bangalore</option>
+        <option>Hyderabad</option><option>Delhi</option><option>Pune</option><option>Kolkata</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Pincode / Delivery Zone</label>
+      <input type="text" id="pin" placeholder="e.g. 600001" maxlength="6" oninput="onPinInput()"/>
+      <div id="zoneBadge" style="display:none" class="zone-badge">
+        📡 <span id="zoneText">—</span>
+      </div>
+    </div>
+    <button class="btn-next" onclick="goNext(1)">Continue →</button>
+  </div>
+
+  <!-- ── STEP 2: Platform + Dynamic Payout ── -->
+  <div class="step-page" id="step2">
+    <div class="step-label">Step 2 of 5</div>
+    <h2>Which platform do you ride for?</h2>
+    <p class="sub">Select your delivery platform to continue</p>
+    <div class="platform-grid">
+      <div class="platform-btn" onclick="pickPlatform('Swiggy',this)"><div class="icon">🟠</div><div class="name">Swiggy</div></div>
+      <div class="platform-btn" onclick="pickPlatform('Zomato',this)"><div class="icon">🔴</div><div class="name">Zomato</div></div>
+      <div class="platform-btn" onclick="pickPlatform('Both',this)"><div class="icon">⚡</div><div class="name">Both</div></div>
+      <div class="platform-btn" onclick="pickPlatform('Other',this)"><div class="icon">📦</div><div class="name">Other</div></div>
+    </div>
+
+    <!-- DYNAMIC payout explanation — no fixed numbers -->
+    <div class="dynamic-box">
+      <div class="db-title">⚡ How Your Compensation is Calculated</div>
+      <div class="formula-line" style="background:rgba(30,111,255,0.08)">
+        <div class="fl-label">🌧️ Heavy Rain</div>
+        <div class="fl-range" style="color:var(--blue-light)">₹80 – ₹300</div>
+      </div>
+      <div class="formula-line" style="background:rgba(255,107,43,0.08)">
+        <div class="fl-label">🌡️ Extreme Heat</div>
+        <div class="fl-range" style="color:var(--orange)">₹80 – ₹300</div>
+      </div>
+      <div class="formula-line" style="background:rgba(255,71,87,0.08)">
+        <div class="fl-label">🌊 Flood Alert</div>
+        <div class="fl-range" style="color:var(--red)">₹80 – ₹300</div>
+      </div>
+      <div class="formula-note">
+        <strong>Why a range, not a fixed amount?</strong> Your payout is calculated dynamically each week based on how many riders are affected in your zone.
+        <span class="eq">Payout = Risk Pool ÷ Affected Riders in your zone</span>
+        Fewer affected riders → higher individual payout (up to ₹300). More affected → still guaranteed minimum ₹80. Payouts are always automatic — no forms needed.
+      </div>
+    </div>
+    <button class="btn-next" id="btn2" disabled onclick="goNext(2)">Continue →</button>
+  </div>
+
+  <!-- ── STEP 3: Your Plan ── -->
+  <div class="step-page" id="step3">
+    <div class="step-label">Step 3 of 5</div>
+    <h2>Your ₹50 Weekly Plan</h2>
+    <p class="sub">Here's exactly where your money goes</p>
+    <div class="pool-mini">
+      <div class="pool-mini-card r"><div class="amt">₹30</div><div class="lbl">🛡️ Risk Pool<br>60% · pays your disruption</div></div>
+      <div class="pool-mini-card s"><div class="amt">₹10</div><div class="lbl">🤝 Community<br>20% · SHG fund</div></div>
+      <div class="pool-mini-card c"><div class="amt">₹10</div><div class="lbl">💰 Savings<br>20% · your cashback</div></div>
+    </div>
+    <div style="background:rgba(30,111,255,0.06);border:1px solid rgba(30,111,255,0.14);border-radius:12px;padding:16px;margin-bottom:12px;">
+      <div style="font-size:0.74rem;color:var(--muted);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">✅ What you get</div>
+      <div style="display:flex;flex-direction:column;gap:9px;font-size:0.83rem;color:var(--text);">
+        <div>⚡ Auto-payout when weather is unsafe in your zone — no action needed</div>
+        <div>🧮 Payout = Risk Pool ÷ affected riders (₹80–₹300 range)</div>
+        <div>💰 Cashback from savings pool if no disruptions that month</div>
+        <div>🆘 Safety Pause button — press anytime you feel unsafe</div>
+        <div>📍 Hyperlocal IMD data — only your zone triggers your payout</div>
+        <div>🔒 GPS-verified — fraud proof, fair for everyone</div>
+      </div>
+    </div>
+    <div style="background:rgba(255,209,102,0.06);border:1px solid rgba(255,209,102,0.12);border-radius:10px;padding:12px 14px;font-size:0.76rem;color:var(--muted);line-height:1.6;">
+      💡 <strong style="color:var(--yellow)">Your premium is never wasted</strong> — if nothing happens, your ₹10 savings share comes back as cashback at month end.
+    </div>
+    <button class="btn-next" onclick="goNext(3)">Looks Good! →</button>
+  </div>
+
+  <!-- ── STEP 4: Payment Method ── -->
+  <div class="step-page" id="step4">
+    <div class="step-label">Step 4 of 5</div>
+    <h2>Set Up Payment 💳</h2>
+    <p class="sub">Choose how your ₹50 weekly premium gets collected</p>
+
+    <div class="pay-grid">
+      <div class="pay-btn" onclick="pickPay('auto',this)">
+        <div class="p-icon">🔄</div>
+        <div class="p-name">Auto-Deduct</div>
+        <div class="p-sub">From platform earnings</div>
+      </div>
+      <div class="pay-btn" onclick="pickPay('upi',this)">
+        <div class="p-icon">📱</div>
+        <div class="p-name">UPI</div>
+        <div class="p-sub">GPay, PhonePe, Paytm</div>
+      </div>
+      <div class="pay-btn" onclick="pickPay('bank',this)">
+        <div class="p-icon">🏦</div>
+        <div class="p-name">Bank Transfer</div>
+        <div class="p-sub">NEFT / IMPS</div>
+      </div>
+      <div class="pay-btn" onclick="pickPay('wallet',this)">
+        <div class="p-icon">👝</div>
+        <div class="p-name">Platform Wallet</div>
+        <div class="p-sub">Swiggy / Zomato wallet</div>
+      </div>
+    </div>
+
+    <!-- Dynamic input per method -->
+    <div class="pay-input-wrap" id="pi-auto">
+      <div class="pay-info-box">
+        <strong>✅ Auto-Deduct selected</strong> — ₹50 will be automatically deducted from your weekly platform earnings (Swiggy/Zomato). No action needed each week. You'll see it as "GigGuard Premium" in your earnings statement.
+      </div>
+    </div>
+    <div class="pay-input-wrap" id="pi-upi">
+      <div class="form-group" style="margin-bottom:0;margin-top:4px;">
+        <label>UPI ID</label>
+        <input type="text" id="upiId" placeholder="e.g. rahul@gpay or 9876543210@paytm"/>
+      </div>
+      <div class="pay-info-box" style="margin-top:10px;">
+        A ₹1 test charge will verify your UPI. <strong>Auto-debit mandate</strong> of ₹50/week will be set up. You'll get a WhatsApp confirmation.
+      </div>
+    </div>
+    <div class="pay-input-wrap" id="pi-bank">
+      <div class="form-group" style="margin-bottom:10px;margin-top:4px;">
+        <label>Account Number</label>
+        <input type="text" id="accNum" placeholder="e.g. 1234567890"/>
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label>IFSC Code</label>
+        <input type="text" id="ifsc" placeholder="e.g. SBIN0001234"/>
+      </div>
+      <div class="pay-info-box" style="margin-top:10px;">
+        <strong>NACH mandate</strong> will be set up for weekly ₹50 auto-debit. You'll receive an OTP to authorise.
+      </div>
+    </div>
+    <div class="pay-input-wrap" id="pi-wallet">
+      <div class="pay-info-box">
+        <strong>✅ Platform Wallet selected</strong> — ₹50 will be deducted from your Swiggy/Zomato in-app wallet balance every Monday. Ensure wallet has sufficient balance or link a UPI as backup.
+      </div>
+    </div>
+
+    <!-- Payout account -->
+    <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--border);">
+      <div style="font-size:0.78rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;">💸 Payout Account (where we send your compensation)</div>
+      <div class="pay-grid" style="margin-bottom:0;">
+        <div class="pay-btn" onclick="pickPayout('upi_out',this)">
+          <div class="p-icon">📱</div>
+          <div class="p-name">UPI</div>
+          <div class="p-sub">Instant transfer</div>
+        </div>
+        <div class="pay-btn" onclick="pickPayout('bank_out',this)">
+          <div class="p-icon">🏦</div>
+          <div class="p-name">Bank Account</div>
+          <div class="p-sub">2–4 hrs</div>
+        </div>
+      </div>
+      <div class="pay-input-wrap" id="po-upi_out" style="margin-top:10px;">
+        <input type="text" id="payoutUpi" placeholder="UPI ID for receiving payouts"/>
+      </div>
+      <div class="pay-input-wrap" id="po-bank_out" style="margin-top:10px;">
+        <div class="pay-info-box">Using same bank account as above for payouts.</div>
+      </div>
+    </div>
+
+    <button class="btn-next" id="btn4" disabled onclick="goNext(4)">Continue →</button>
+  </div>
+
+  <!-- ── STEP 5: Review & Confirm ── -->
+  <div class="step-page" id="step5">
+    <div class="step-label">Almost Done!</div>
+    <h2>Review & Confirm 🎉</h2>
+    <p class="sub">Your GigGuard profile is ready</p>
+    <div>
+      <div class="summary-row"><span class="summary-key">Name</span><span class="summary-val" id="s-name">—</span></div>
+      <div class="summary-row"><span class="summary-key">Phone</span><span class="summary-val" id="s-phone">—</span></div>
+      <div class="summary-row"><span class="summary-key">City / Zone</span><span class="summary-val" id="s-city">—</span></div>
+      <div class="summary-row"><span class="summary-key">IMD Station</span><span class="summary-val" id="s-station" style="color:var(--green);font-size:0.8rem;">—</span></div>
+      <div class="summary-row"><span class="summary-key">Platform</span><span class="summary-val" id="s-platform">—</span></div>
+      <div class="summary-row"><span class="summary-key">Weekly Premium</span><span class="summary-val" style="color:var(--blue-light);">₹50 / week (auto)</span></div>
+      <div class="summary-row"><span class="summary-key">Payment Method</span><span class="summary-val" id="s-paymethod">—</span></div>
+      <div class="summary-row"><span class="summary-key">Payout Account</span><span class="summary-val" id="s-payoutacc">—</span></div>
+      <div class="summary-row">
+        <span class="summary-key">Disruption Payout</span>
+        <span class="summary-val" style="color:var(--green);">₹80–₹300 <span style="color:var(--muted);font-size:0.75rem;display:block;">Risk Pool ÷ Affected Riders</span></span>
+      </div>
+      <div class="summary-row"><span class="summary-key">Cashback</span><span class="summary-val" style="color:var(--orange);">₹10 savings → returned at month end if no claims</span></div>
+    </div>
+    <button class="btn-next" onclick="complete()" style="background:linear-gradient(135deg,var(--green),#00a86b);box-shadow:0 8px 24px rgba(0,214,143,0.25);">
+      ✅ Join GigGuard – Start Protection
+    </button>
+  </div>
+</div>
+
+<script>
+  let selPlatform='', selPay='', selPayout='', curStep=1;
+
+  const zoneMap={
+    '600':'Nungambakkam IMD Station, Chennai','560':'HAL Airport IMD, Bangalore',
+    '400':'Colaba IMD Observatory, Mumbai','500':'Begumpet IMD Station, Hyderabad',
+    '110':'Safdarjung IMD Station, Delhi','411':'Shivajinagar IMD, Pune','700':'Alipore IMD, Kolkata'
+  };
+  const cityPins={'Chennai':'600','Mumbai':'400','Bangalore':'560','Hyderabad':'500','Delhi':'110','Pune':'411','Kolkata':'700'};
+  const payLabels={'auto':'Auto-deduct from earnings','upi':'UPI auto-debit','bank':'Bank NACH mandate','wallet':'Platform wallet'};
+  const payoutLabels={'upi_out':'UPI instant transfer','bank_out':'Bank account transfer'};
+
+  function onCityChange(){
+    const city=document.getElementById('city').value;
+    if(city&&cityPins[city]) document.getElementById('pin').placeholder=cityPins[city]+'xxx';
+    refreshZone();
+  }
+  function onPinInput(){ refreshZone(); }
+  function refreshZone(){
+    const pin=document.getElementById('pin').value;
+    const badge=document.getElementById('zoneBadge');
+    if(pin.length>=3&&zoneMap[pin.substring(0,3)]){
+      document.getElementById('zoneText').textContent='Linked to '+zoneMap[pin.substring(0,3)];
+      badge.style.display='flex';
+    } else { badge.style.display='none'; }
+  }
+
+  function pickPlatform(p,el){
+    selPlatform=p;
+    document.querySelectorAll('.platform-btn').forEach(b=>b.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('btn2').disabled=false;
+  }
+
+  function pickPay(method, el){
+    selPay=method;
+    document.querySelectorAll('.pay-btn:not([onclick*="pickPayout"])').forEach(b=>b.classList.remove('selected'));
+    el.classList.add('selected');
+    ['auto','upi','bank','wallet'].forEach(m=>{ document.getElementById('pi-'+m).style.display='none'; });
+    const w=document.getElementById('pi-'+method);
+    w.style.display='block'; w.style.animation='fadeIn 0.3s ease';
+    checkPayComplete();
+  }
+
+  function pickPayout(method, el){
+    selPayout=method;
+    document.querySelectorAll('[onclick*="pickPayout"]').forEach(b=>b.classList.remove('selected'));
+    el.classList.add('selected');
+    ['upi_out','bank_out'].forEach(m=>{ document.getElementById('po-'+m).style.display='none'; });
+    const w=document.getElementById('po-'+method);
+    w.style.display='block'; w.style.animation='fadeIn 0.3s ease';
+    checkPayComplete();
+  }
+
+  function checkPayComplete(){
+    document.getElementById('btn4').disabled=!(selPay&&selPayout);
+  }
+
+  function goNext(from){
+    if(from===4){
+      const pin=document.getElementById('pin').value||'';
+      const prefix=pin.substring(0,3);
+      document.getElementById('s-name').textContent=document.getElementById('name').value||'—';
+      document.getElementById('s-phone').textContent=document.getElementById('phone').value||'—';
+      document.getElementById('s-city').textContent=(document.getElementById('city').value||'—')+' · '+pin;
+      document.getElementById('s-station').textContent=(zoneMap[prefix]||'Auto-detected');
+      document.getElementById('s-platform').textContent=selPlatform||'—';
+      document.getElementById('s-paymethod').textContent=payLabels[selPay]||'—';
+      const upiId=document.getElementById('upiId').value;
+      const payoutUpi=document.getElementById('payoutUpi').value;
+      document.getElementById('s-payoutacc').textContent=selPayout==='upi_out'?(payoutUpi||'UPI (set)'):('Bank account (set)');
+    }
+    const pages=document.querySelectorAll('.step-page');
+    const progs=document.querySelectorAll('.prog-step');
+    pages[curStep-1].classList.remove('active');
+    progs[curStep-1].classList.remove('active');
+    progs[curStep-1].classList.add('done');
+    curStep++;
+    pages[curStep-1].classList.add('active');
+    progs[curStep-1].classList.add('active');
+  }
+
+  function complete(){
+    const pin=document.getElementById('pin').value||'600001';
+    localStorage.setItem('gigguard_user',JSON.stringify({
+      name:document.getElementById('name').value||'Rahul Kumar',
+      city:document.getElementById('city').value||'Chennai',
+      platform:selPlatform||'Swiggy',
+      pin:pin,
+      payMethod:payLabels[selPay]||'Auto-deduct',
+      station:zoneMap[pin.substring(0,3)]||'Nungambakkam IMD Station, Chennai'
+    }));
+    window.location.href='dashboard.html';
+  }
+</script>
+</body>
+</html>

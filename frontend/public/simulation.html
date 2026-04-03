@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GigGuard – Payout Simulation</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:#0a0f1e; --navy2:#111827; --navy3:#0d1424;
+    --blue:#1e6fff; --blue-light:#3d8bff;
+    --orange:#ff6b2b; --orange-light:#ff8c5a;
+    --green:#00d68f; --red:#ff4757; --yellow:#ffd166;
+    --card:rgba(255,255,255,0.04); --border:rgba(255,255,255,0.08);
+    --text:#e8eaf0; --muted:#7a8096; --white:#ffffff;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;display:flex;}
+
+  .sidebar{width:240px;background:var(--navy2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:28px 0;position:fixed;top:0;left:0;bottom:0;z-index:50;}
+  .sidebar-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--white);padding:0 24px 28px;border-bottom:1px solid var(--border);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .sidebar-logo span{color:var(--orange);}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:13px 24px;color:var(--muted);cursor:pointer;transition:all 0.2s;font-size:0.9rem;border-left:3px solid transparent;text-decoration:none;}
+  .nav-item:hover{color:var(--white);background:var(--card);}
+  .nav-item.active{color:var(--white);background:rgba(30,111,255,0.1);border-left-color:var(--blue);}
+  .nav-item .icon{font-size:1rem;width:20px;text-align:center;}
+  .sidebar-bottom{margin-top:auto;padding:16px 24px;border-top:1px solid var(--border);}
+  .rider-mini{display:flex;align-items:center;gap:10px;}
+  .rider-avatar{width:36px;height:36px;background:linear-gradient(135deg,var(--blue),var(--orange));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+  .rider-mini-name{font-size:0.85rem;color:var(--white);font-weight:500;}
+  .rider-mini-sub{font-size:0.72rem;color:var(--muted);}
+
+  .main{margin-left:240px;flex:1;padding:28px 32px;overflow-x:hidden;}
+  .page-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;color:var(--white);margin-bottom:4px;}
+  .page-sub{color:var(--muted);font-size:0.85rem;margin-bottom:20px;}
+
+  .scenario-row{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+  .sc-pill{display:flex;align-items:center;gap:8px;padding:11px 20px;border-radius:50px;border:2px solid var(--border);background:var(--card);cursor:pointer;transition:all 0.2s;font-size:0.88rem;font-weight:600;color:var(--muted);}
+  .sc-pill:hover{border-color:rgba(255,255,255,0.2);color:var(--white);}
+  .sc-pill.sel-rain{border-color:var(--blue);background:rgba(30,111,255,0.12);color:var(--blue-light);}
+  .sc-pill.sel-heat{border-color:var(--orange);background:rgba(255,107,43,0.12);color:var(--orange-light);}
+  .sc-pill.sel-flood{border-color:var(--red);background:rgba(255,71,87,0.12);color:var(--red);}
+
+  .top-grid{display:grid;grid-template-columns:1.15fr 0.95fr 0.9fr;gap:18px;margin-bottom:18px;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px;}
+  .card-title{font-family:'Syne',sans-serif;font-size:0.92rem;font-weight:700;color:var(--white);margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
+
+  /* MAP */
+  .map-container{width:100%;height:290px;background:rgba(8,14,28,0.9);border-radius:12px;overflow:hidden;border:1px solid var(--border);position:relative;}
+  .map-legend{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;}
+  .ml-item{display:flex;align-items:center;gap:6px;font-size:0.7rem;color:var(--muted);}
+  .ml-dot{width:10px;height:10px;border-radius:2px;}
+
+  /* IMD */
+  .imd-row{display:flex;align-items:center;gap:8px;padding:9px 11px;background:rgba(255,255,255,0.03);border-radius:9px;margin-bottom:7px;}
+  .imd-row:last-child{margin-bottom:0;}
+  .imd-icon{font-size:1rem;width:20px;text-align:center;}
+  .imd-name{font-size:0.76rem;color:var(--muted);flex:1;}
+  .imd-val{font-size:0.84rem;font-weight:600;color:var(--white);white-space:nowrap;}
+  .imd-bar-wrap{width:60px;height:5px;background:var(--border);border-radius:4px;overflow:hidden;margin-left:6px;}
+  .imd-bar{height:100%;border-radius:4px;transition:width 1.2s ease,background 1.2s ease;}
+
+  /* POOL MATH */
+  .pm-row{display:flex;justify-content:space-between;align-items:center;padding:9px 11px;border-radius:9px;background:rgba(255,255,255,0.03);margin-bottom:6px;}
+  .pm-row:last-child{margin-bottom:0;}
+  .pm-label{font-size:0.76rem;color:var(--muted);}
+  .pm-val{font-size:0.9rem;font-weight:700;}
+  .pm-divider{height:1px;background:var(--border);margin:6px 0;}
+  .pm-formula{font-size:0.71rem;color:var(--muted);padding:8px 11px;background:rgba(30,111,255,0.06);border-radius:8px;line-height:1.7;margin-top:6px;}
+  .pm-formula span{color:var(--blue-light);font-weight:600;}
+
+  .bottom-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;}
+
+  /* TIMELINE */
+  .timeline{display:flex;flex-direction:column;}
+  .t-step{display:flex;gap:12px;padding-bottom:17px;position:relative;}
+  .t-step:last-child{padding-bottom:0;}
+  .t-step:not(:last-child)::before{content:'';position:absolute;left:14px;top:34px;bottom:0;width:2px;background:var(--border);transition:background 0.5s;}
+  .t-step.done:not(:last-child)::before{background:var(--green);}
+  .t-dot{width:30px;height:30px;border-radius:50%;border:2px solid var(--border);background:var(--navy2);display:flex;align-items:center;justify-content:center;font-size:0.8rem;flex-shrink:0;transition:all 0.3s;}
+  .t-step.active .t-dot{border-color:var(--blue);background:rgba(30,111,255,0.15);animation:pDot 1.2s infinite;}
+  .t-step.done .t-dot{border-color:var(--green);background:rgba(0,214,143,0.15);}
+  @keyframes pDot{0%,100%{box-shadow:0 0 0 0 rgba(30,111,255,0.4)}50%{box-shadow:0 0 0 7px rgba(30,111,255,0)}}
+  .t-content{flex:1;padding-top:3px;}
+  .t-label{font-size:0.83rem;font-weight:600;color:var(--muted);transition:color 0.3s;}
+  .t-step.active .t-label,.t-step.done .t-label{color:var(--white);}
+  .t-desc{font-size:0.73rem;color:var(--muted);margin-top:2px;line-height:1.5;max-height:0;overflow:hidden;transition:max-height 0.5s,opacity 0.4s;opacity:0;}
+  .t-step.active .t-desc,.t-step.done .t-desc{max-height:80px;opacity:1;}
+
+  /* RIDER DOTS */
+  .rd-wrap{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;}
+  .rider-dot{width:11px;height:11px;border-radius:50%;transition:background 0.5s,transform 0.3s;}
+  .rd-legend{display:flex;gap:14px;margin-bottom:14px;}
+  .rdl{display:flex;align-items:center;gap:5px;font-size:0.72rem;color:var(--muted);}
+  .rdl-dot{width:9px;height:9px;border-radius:50%;}
+
+  /* RESULT */
+  .payout-result{display:none;margin-top:14px;animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);}
+  @keyframes popIn{from{transform:scale(0.85);opacity:0}to{transform:scale(1);opacity:1}}
+  .pr-main{background:rgba(0,214,143,0.08);border:1px solid rgba(0,214,143,0.25);border-radius:14px;padding:18px;text-align:center;margin-bottom:10px;}
+  .pr-amount{font-family:'Syne',sans-serif;font-size:2.8rem;font-weight:800;color:var(--green);}
+  .pr-label{font-size:0.78rem;color:var(--muted);margin-top:3px;}
+  .pr-meta{display:flex;gap:8px;}
+  .pr-meta-item{flex:1;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;}
+  .pr-meta-val{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--white);}
+  .pr-meta-label{font-size:0.68rem;color:var(--muted);margin-top:2px;}
+  .cashback-notice{background:rgba(255,107,43,0.08);border:1px solid rgba(255,107,43,0.2);border-radius:12px;padding:14px 16px;margin-top:10px;display:flex;align-items:flex-start;gap:10px;}
+  .cn-icon{font-size:1.2rem;margin-top:1px;}
+  .cn-title{font-size:0.82rem;font-weight:600;color:var(--orange-light);}
+  .cn-sub{font-size:0.72rem;color:var(--muted);margin-top:2px;line-height:1.5;}
+
+  .btn-sim{width:100%;background:linear-gradient(135deg,var(--blue),var(--blue-light));color:white;padding:14px;border-radius:11px;font-size:0.92rem;font-weight:600;border:none;cursor:pointer;transition:all 0.2s;box-shadow:0 6px 18px rgba(30,111,255,0.25);font-family:'DM Sans',sans-serif;margin-top:14px;}
+  .btn-sim:hover{transform:translateY(-2px);}
+  .btn-sim:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+  .btn-reset{width:100%;background:transparent;color:var(--muted);padding:10px;border-radius:11px;font-size:0.8rem;border:1px solid var(--border);cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:7px;transition:all 0.2s;}
+  .btn-reset:hover{color:var(--white);border-color:rgba(255,255,255,0.2);}
+
+  .badge{padding:3px 9px;border-radius:50px;font-size:0.68rem;font-weight:600;}
+  .badge-green{background:rgba(0,214,143,0.15);color:var(--green);}
+  .badge-blue{background:rgba(30,111,255,0.15);color:var(--blue-light);}
+
+  /* FRAUD CHECK CARDS */
+  .fraud-check{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;transition:all 0.4s;}
+  .fraud-check.pass{background:rgba(0,214,143,0.07);border-color:rgba(0,214,143,0.25);}
+  .fc-icon{font-size:0.9rem;width:18px;flex-shrink:0;margin-top:1px;}
+  .fc-content{flex:1;}
+  .fc-label{font-size:0.75rem;color:var(--muted);line-height:1.4;transition:color 0.3s;}
+  .fraud-check.pass .fc-label{color:var(--text);}
+  .fc-detail{font-size:0.68rem;color:var(--muted);margin-top:2px;transition:color 0.3s;}
+  .fc-badge{font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:50px;white-space:nowrap;flex-shrink:0;margin-top:1px;}
+  .fc-badge.pass{background:rgba(0,214,143,0.15);color:var(--green);}
+  .fc-badge.pending{background:rgba(255,255,255,0.06);color:var(--muted);}
+
+  .rain-overlay{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:999;display:none;}
+  .rdrop{position:absolute;top:-30px;width:2px;background:linear-gradient(to bottom,transparent,rgba(100,180,255,0.5));border-radius:2px;animation:fall linear infinite;}
+  @keyframes fall{to{transform:translateY(110vh);}}
+</style>
+</head>
+<body>
+
+<div class="rain-overlay" id="rainOverlay"></div>
+
+<div class="sidebar">
+  <div class="sidebar-logo">🛡️ Gig<span>Guard</span></div>
+  <a class="nav-item" href="dashboard.html"><span class="icon">📊</span> Dashboard</a>
+  <a class="nav-item active" href="simulation.html"><span class="icon">⚡</span> Payout Simulation</a>
+  <a class="nav-item" href="history.html"><span class="icon">📋</span> History & Cashback</a>
+  <a class="nav-item" href="home.html"><span class="icon">🏠</span> Home</a>
+  <div class="sidebar-bottom">
+    <div class="rider-mini">
+      <div class="rider-avatar">🏍️</div>
+      <div>
+        <div class="rider-mini-name" id="sName">Rahul Kumar</div>
+        <div class="rider-mini-sub" id="sCity">Chennai · Swiggy</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-title">⚡ Payout Simulation</div>
+  <div class="page-sub">Real math · Hyperlocal zones · Risk Pool ÷ Affected Riders = Dynamic payout · Savings Pool → cashback at month end</div>
+
+  <div class="scenario-row">
+    <div class="sc-pill sel-rain" id="pill-rain">🌧️ Heavy Rain</div>
+    <div class="sc-pill" id="pill-heat">🌡️ Extreme Heat</div>
+    <div class="sc-pill" id="pill-flood">🌊 Flood Alert</div>
+  </div>
+
+  <div class="top-grid">
+    <!-- ZONE MAP -->
+    <div class="card" style="padding:16px;">
+      <div class="card-title" style="margin-bottom:10px;">
+        📍 Hyperlocal Zone Map – Chennai
+        <span class="badge badge-blue">IMD Live</span>
+      </div>
+      <div class="map-container">
+        <svg id="zoneSvg" viewBox="0 0 420 290" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+          <rect width="420" height="290" fill="#08101c"/>
+          <!-- roads -->
+          <line x1="140" y1="0" x2="140" y2="290" stroke="rgba(255,255,255,0.07)" stroke-width="5"/>
+          <line x1="280" y1="0" x2="280" y2="290" stroke="rgba(255,255,255,0.07)" stroke-width="5"/>
+          <line x1="0" y1="96" x2="420" y2="96" stroke="rgba(255,255,255,0.07)" stroke-width="5"/>
+          <line x1="0" y1="193" x2="420" y2="193" stroke="rgba(255,255,255,0.07)" stroke-width="5"/>
+          <line x1="70" y1="0" x2="70" y2="290" stroke="rgba(255,255,255,0.025)" stroke-width="1.5"/>
+          <line x1="210" y1="0" x2="210" y2="290" stroke="rgba(255,255,255,0.025)" stroke-width="1.5"/>
+          <line x1="350" y1="0" x2="350" y2="290" stroke="rgba(255,255,255,0.025)" stroke-width="1.5"/>
+          <line x1="0" y1="48" x2="420" y2="48" stroke="rgba(255,255,255,0.025)" stroke-width="1.5"/>
+          <line x1="0" y1="144" x2="420" y2="144" stroke="rgba(255,255,255,0.025)" stroke-width="1.5"/>
+          <line x1="0" y1="241" x2="420" y2="241" stroke="rgba(255,255,255,0.025)" stroke-width="1.5"/>
+          <!-- 9 zone rects -->
+          <rect id="z1" x="2" y="2" width="135" height="91" rx="5" fill="rgba(0,214,143,0.07)" stroke="rgba(0,214,143,0.35)" stroke-width="1.5"/>
+          <rect id="z2" x="143" y="2" width="135" height="91" rx="5" fill="rgba(0,214,143,0.07)" stroke="rgba(0,214,143,0.35)" stroke-width="1.5"/>
+          <rect id="z3" x="284" y="2" width="134" height="91" rx="5" fill="rgba(0,214,143,0.07)" stroke="rgba(0,214,143,0.35)" stroke-width="1.5"/>
+          <rect id="z4" x="2" y="99" width="135" height="91" rx="5" fill="rgba(0,214,143,0.07)" stroke="rgba(0,214,143,0.35)" stroke-width="1.5"/>
+          <rect id="z5" x="143" y="99" width="135" height="91" rx="5" fill="rgba(0,214,143,0.07)" stroke="rgba(0,214,143,0.35)" stroke-width="1.5"/>
+          <rect id="z6" x="284" y="99" width="134" height="91" rx="5" fill="rgba(0,214,143,0.07)" stroke="rgba(0,214,143,0.35)" stroke-width="1.5"/>
+          <rect id="z7" x="2" y="197" width="135" height="91" rx="5" fill="rgba(0,214,143,0.07)" stroke="rgba(0,214,143,0.35)" stroke-width="1.5"/>
+          <rect id="z8" x="143" y="197" width="135" height="91" rx="5" fill="rgba(0,214,143,0.07)" stroke="rgba(0,214,143,0.35)" stroke-width="1.5"/>
+          <rect id="z9" x="284" y="197" width="134" height="91" rx="5" fill="rgba(0,214,143,0.07)" stroke="rgba(0,214,143,0.35)" stroke-width="1.5"/>
+          <!-- zone name labels -->
+          <text x="69" y="38" text-anchor="middle" fill="rgba(255,255,255,0.55)" font-size="9.5" font-family="DM Sans,sans-serif">Adyar</text>
+          <text x="69" y="51" text-anchor="middle" fill="rgba(255,255,255,0.28)" font-size="8" font-family="DM Sans,sans-serif">600020 · 12 riders</text>
+          <text x="210" y="38" text-anchor="middle" fill="rgba(255,255,255,0.55)" font-size="9.5" font-family="DM Sans,sans-serif">T.Nagar</text>
+          <text x="210" y="51" text-anchor="middle" fill="rgba(255,255,255,0.28)" font-size="8" font-family="DM Sans,sans-serif">600017 · 14 riders</text>
+          <text x="351" y="38" text-anchor="middle" fill="rgba(255,255,255,0.55)" font-size="9.5" font-family="DM Sans,sans-serif">Velachery</text>
+          <text x="351" y="51" text-anchor="middle" fill="rgba(255,255,255,0.28)" font-size="8" font-family="DM Sans,sans-serif">600042 · 11 riders</text>
+          <text x="69" y="135" text-anchor="middle" fill="rgba(255,255,255,0.55)" font-size="9.5" font-family="DM Sans,sans-serif">Anna Nagar</text>
+          <text x="69" y="148" text-anchor="middle" fill="rgba(255,255,255,0.28)" font-size="8" font-family="DM Sans,sans-serif">600040 · 13 riders</text>
+          <text x="210" y="135" text-anchor="middle" fill="rgba(255,255,255,0.55)" font-size="9.5" font-family="DM Sans,sans-serif">Tambaram</text>
+          <text x="210" y="148" text-anchor="middle" fill="rgba(255,255,255,0.28)" font-size="8" font-family="DM Sans,sans-serif">600045 · 10 riders</text>
+          <text x="351" y="135" text-anchor="middle" fill="rgba(255,255,255,0.55)" font-size="9.5" font-family="DM Sans,sans-serif">Porur</text>
+          <text x="351" y="148" text-anchor="middle" fill="rgba(255,255,255,0.28)" font-size="8" font-family="DM Sans,sans-serif">600116 · 9 riders</text>
+          <text x="69" y="232" text-anchor="middle" fill="rgba(255,255,255,0.55)" font-size="9.5" font-family="DM Sans,sans-serif">Guindy</text>
+          <text x="69" y="245" text-anchor="middle" fill="rgba(255,255,255,0.28)" font-size="8" font-family="DM Sans,sans-serif">600032 · 11 riders</text>
+          <text x="210" y="232" text-anchor="middle" fill="rgba(255,255,255,0.55)" font-size="9.5" font-family="DM Sans,sans-serif">Mylapore</text>
+          <text x="210" y="245" text-anchor="middle" fill="rgba(255,255,255,0.28)" font-size="8" font-family="DM Sans,sans-serif">600004 · 10 riders</text>
+          <text x="351" y="228" text-anchor="middle" fill="rgba(255,255,255,0.55)" font-size="9" font-family="DM Sans,sans-serif">Sholinganallur</text>
+          <text x="351" y="241" text-anchor="middle" fill="rgba(255,255,255,0.28)" font-size="8" font-family="DM Sans,sans-serif">600119 · 10 riders</text>
+          <!-- score labels (updated by JS) -->
+          <g id="scoreLabels"></g>
+        </svg>
+      </div>
+      <div class="map-legend">
+        <div class="ml-item"><div class="ml-dot" style="background:rgba(0,214,143,0.5)"></div>Clear – Safe</div>
+        <div class="ml-item"><div class="ml-dot" style="background:rgba(255,209,102,0.6)"></div>Caution</div>
+        <div class="ml-item"><div class="ml-dot" style="background:rgba(255,71,87,0.6)"></div>Unsafe – Payout</div>
+      </div>
+    </div>
+
+    <!-- IMD DATA + CONTROLS -->
+    <div class="card">
+      <div class="card-title">
+        🛰️ IMD Live Data
+        <span class="badge badge-green">● Live</span>
+      </div>
+      <div class="imd-row"><div class="imd-icon">🌧️</div><div class="imd-name">Rainfall</div><div class="imd-val" id="iRain">2 mm/hr</div><div class="imd-bar-wrap"><div class="imd-bar" id="bRain" style="width:5%;background:var(--blue)"></div></div></div>
+      <div class="imd-row"><div class="imd-icon">🌡️</div><div class="imd-name">Temperature</div><div class="imd-val" id="iTemp">31°C</div><div class="imd-bar-wrap"><div class="imd-bar" id="bTemp" style="width:42%;background:var(--yellow)"></div></div></div>
+      <div class="imd-row"><div class="imd-icon">💨</div><div class="imd-name">Wind Speed</div><div class="imd-val" id="iWind">14 km/h</div><div class="imd-bar-wrap"><div class="imd-bar" id="bWind" style="width:18%;background:var(--green)"></div></div></div>
+      <div class="imd-row"><div class="imd-icon">🌊</div><div class="imd-name">Flood Index</div><div class="imd-val" id="iFlood">Low</div><div class="imd-bar-wrap"><div class="imd-bar" id="bFlood" style="width:5%;background:var(--green)"></div></div></div>
+      <div class="imd-row"><div class="imd-icon">😷</div><div class="imd-name">AQI</div><div class="imd-val" id="iAqi">88 – Good</div><div class="imd-bar-wrap"><div class="imd-bar" id="bAqi" style="width:22%;background:var(--green)"></div></div></div>
+      <div style="margin-top:12px;padding:10px 12px;background:rgba(30,111,255,0.06);border:1px solid rgba(30,111,255,0.1);border-radius:9px;">
+        <div style="font-size:0.7rem;color:var(--muted);margin-bottom:4px;">📡 India Meteorological Department</div>
+        <div style="font-size:0.72rem;color:var(--blue-light);">Polled every 15 min · Per-pincode resolution</div>
+      </div>
+      <button class="btn-sim" id="simBtn">🚀 Trigger Scenario</button>
+      <button class="btn-reset" onclick="resetAll()">↺ Reset Simulation</button>
+    </div>
+
+    <!-- POOL MATH -->
+    <div class="card">
+      <div class="card-title">💰 Pool Math (Live)</div>
+      <div class="pm-row"><div class="pm-label">Total Riders</div><div class="pm-val" style="color:var(--white)">100</div></div>
+      <div class="pm-row"><div class="pm-label">Weekly Premium each</div><div class="pm-val" style="color:var(--white)">₹50</div></div>
+      <div class="pm-divider"></div>
+      <div class="pm-row" style="background:rgba(30,111,255,0.08)"><div class="pm-label">🛡️ Risk Pool (60%)</div><div class="pm-val" style="color:var(--blue-light)">₹3,000</div></div>
+      <div class="pm-row" style="background:rgba(0,214,143,0.06)"><div class="pm-label">🤝 Community Fund (20%)</div><div class="pm-val" style="color:var(--green)">₹1,000</div></div>
+      <div class="pm-row" style="background:rgba(255,107,43,0.06)"><div class="pm-label">💰 Savings Pool (20%)</div><div class="pm-val" style="color:var(--orange)">₹1,000</div></div>
+      <div class="pm-divider"></div>
+      <div class="pm-row" style="background:rgba(255,71,87,0.07)"><div class="pm-label">🚨 Affected Riders</div><div class="pm-val" style="color:var(--red)" id="affCount">—</div></div>
+      <div class="pm-row" style="background:rgba(0,214,143,0.07)"><div class="pm-label">✅ Clear Riders</div><div class="pm-val" style="color:var(--green)" id="clrCount">—</div></div>
+      <div class="pm-row" style="border:1px solid rgba(0,214,143,0.25);background:rgba(0,214,143,0.09);margin-top:4px"><div class="pm-label" style="font-weight:600;color:var(--white)">⚡ Payout / Rider</div><div class="pm-val" style="color:var(--green);font-size:1.15rem" id="perRider">—</div></div>
+      <div class="pm-formula" id="formulaBox">Select a scenario and trigger to see the live calculation.</div>
+      <div class="pm-row" style="background:rgba(255,107,43,0.07);margin-top:4px"><div class="pm-label">🎁 Cashback / clear rider</div><div class="pm-val" style="color:var(--orange)" id="cbVal">₹10 at month end</div></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM -->
+  <div class="bottom-grid">
+    <!-- RIDER DOTS + ZONE TABLE -->
+    <div class="card">
+      <div class="card-title">👥 100 Riders – Live Status<span class="badge badge-blue" id="distBadge">Waiting</span></div>
+      <div class="rd-legend">
+        <div class="rdl"><div class="rdl-dot" style="background:rgba(255,255,255,0.15)"></div>Idle</div>
+        <div class="rdl"><div class="rdl-dot" style="background:var(--green)"></div>Safe – no payout</div>
+        <div class="rdl"><div class="rdl-dot" style="background:var(--red)"></div>Affected – auto payout</div>
+      </div>
+      <div class="rd-wrap" id="riderDots"></div>
+      <div style="margin-top:14px;">
+        <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Zone-wise breakdown</div>
+        <div id="zoneTable" style="display:flex;flex-direction:column;gap:5px;"></div>
+      </div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="card">
+      <div class="card-title">🔄 Auto-Process Flow</div>
+      <div class="timeline">
+        <div class="t-step" id="ts1"><div class="t-dot">📡</div><div class="t-content"><div class="t-label">IMD Hyperlocal Data Received</div><div class="t-desc" id="td1">Pulling weather for all 9 Chennai zones...</div></div></div>
+        <div class="t-step" id="ts2"><div class="t-dot">🧠</div><div class="t-content"><div class="t-label">AI Workability Score Calculated</div><div class="t-desc" id="td2">Analysing rain, temp, wind and flood risk per zone...</div></div></div>
+        <div class="t-step" id="ts3"><div class="t-dot">🗺️</div><div class="t-content"><div class="t-label">Score Drops – Unsafe Zones Flagged</div><div class="t-desc" id="td3">Zones below score 30 marked red on map...</div></div></div>
+
+        <!-- FRAUD PREVENTION STEP with sub-checks -->
+        <div class="t-step" id="ts4">
+          <div class="t-dot">🔍</div>
+          <div class="t-content">
+            <div class="t-label">3 Fraud Prevention Checks</div>
+            <div class="t-desc" id="td4">Running automated fraud detection on all affected riders...</div>
+            <div id="fraudChecks" style="display:none;margin-top:10px;display:none;flex-direction:column;gap:6px;">
+              <div class="fraud-check" id="fc1">
+                <div class="fc-icon">⏳</div>
+                <div class="fc-content">
+                  <div class="fc-label">Was rider <strong>active on platform</strong> before disruption?</div>
+                  <div class="fc-detail" id="fc1d">Checking platform login data...</div>
+                </div>
+                <div class="fc-badge" id="fc1b">—</div>
+              </div>
+              <div class="fraud-check" id="fc2">
+                <div class="fc-icon">⏳</div>
+                <div class="fc-content">
+                  <div class="fc-label">GPS – Was rider <strong>in the affected zone</strong>?</div>
+                  <div class="fc-detail" id="fc2d">Verifying GPS coordinates...</div>
+                </div>
+                <div class="fc-badge" id="fc2b">—</div>
+              </div>
+              <div class="fraud-check" id="fc3">
+                <div class="fc-icon">⏳</div>
+                <div class="fc-content">
+                  <div class="fc-label">Matches rider's <strong>normal work pattern</strong>?</div>
+                  <div class="fc-detail" id="fc3d">Comparing against historical ride schedule...</div>
+                </div>
+                <div class="fc-badge" id="fc3b">—</div>
+              </div>
+              <div id="fraudResult" style="display:none;margin-top:4px;padding:8px 12px;background:rgba(0,214,143,0.08);border:1px solid rgba(0,214,143,0.2);border-radius:8px;font-size:0.73rem;color:var(--green);font-weight:600;">
+                ✅ All 3 checks passed. Genuine disruption confirmed.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="t-step" id="ts5">
+          <div class="t-dot">🧮</div>
+          <div class="t-content">
+            <div class="t-label">Dynamic Payout Calculated</div>
+            <div class="t-desc" id="td5">Risk Pool ÷ Affected Riders = per-rider amount...</div>
+            <!-- Payout formula box -->
+            <div id="formulaReveal" style="display:none;margin-top:10px;background:rgba(10,15,30,0.8);border:1px solid rgba(30,111,255,0.25);border-radius:10px;padding:14px;">
+              <div style="font-size:0.7rem;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em;">Payout Formula</div>
+              <div id="formulaSteps" style="font-size:0.82rem;color:var(--text);line-height:2;"></div>
+              <div id="formulaFinal" style="margin-top:8px;font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--green);display:none;"></div>
+              <div id="formulaCap" style="font-size:0.7rem;color:var(--muted);margin-top:4px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="t-step" id="ts6"><div class="t-dot">💸</div><div class="t-content"><div class="t-label">Released from Risk Pool</div><div class="t-desc" id="td6">Deducting from pool and sending simultaneously...</div></div></div>
+        <div class="t-step" id="ts7"><div class="t-dot">✅</div><div class="t-content"><div class="t-label">Money Credited!</div><div class="t-desc" id="td7">Amount credited. WhatsApp alert sent to all riders.</div></div></div>
+      </div>
+
+      <div class="payout-result" id="payoutResult">
+        <div class="pr-main">
+          <div style="font-size:1.1rem;margin-bottom:4px;">🎉 Auto-Payouts Complete!</div>
+          <div class="pr-amount" id="prAmt">₹—</div>
+          <div class="pr-label">per affected rider · auto-credited</div>
+        </div>
+        <div class="pr-meta">
+          <div class="pr-meta-item"><div class="pr-meta-val" id="pmAff">—</div><div class="pr-meta-label">Riders Paid</div></div>
+          <div class="pr-meta-item"><div class="pr-meta-val" id="pmTot">—</div><div class="pr-meta-label">Total Out</div></div>
+          <div class="pr-meta-item"><div class="pr-meta-val">~11s</div><div class="pr-meta-label">Time Taken</div></div>
+        </div>
+        <div class="cashback-notice">
+          <div class="cn-icon">🎁</div>
+          <div>
+            <div class="cn-title" id="cnTitle">—</div>
+            <div class="cn-sub">Their Savings Pool share (₹10/rider) is preserved and returned as cashback at month end. Zero premium wasted.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── USER ──────────────────────────────────────────────────────
+const user = JSON.parse(localStorage.getItem('gigguard_user')||'{"name":"Rahul Kumar","city":"Chennai","platform":"Swiggy"}');
+document.getElementById('sName').textContent = user.name||'Rahul Kumar';
+document.getElementById('sCity').textContent = (user.city||'Chennai')+' · '+(user.platform?user.platform[0].toUpperCase()+user.platform.slice(1):'Swiggy');
+
+// ── ZONES (9 zones, 100 riders total) ─────────────────────────
+const ZONES = [
+  {name:'Adyar',         pin:'600020', riders:12},
+  {name:'T.Nagar',       pin:'600017', riders:14},
+  {name:'Velachery',     pin:'600042', riders:11},
+  {name:'Anna Nagar',    pin:'600040', riders:13},
+  {name:'Tambaram',      pin:'600045', riders:10},
+  {name:'Porur',         pin:'600116', riders:9 },
+  {name:'Guindy',        pin:'600032', riders:11},
+  {name:'Mylapore',      pin:'600004', riders:10},
+  {name:'Sholinganallur',pin:'600119', riders:10},
+];
+const TOTAL_RIDERS = 100;
+const RISK_POOL    = 3000; // ₹50 × 100 × 60%
+const SAVINGS_POOL = 1000; // ₹50 × 100 × 20%
+
+// ── SCENARIOS ─────────────────────────────────────────────────
+const SC = {
+  rain: {
+    imd:{rain:{v:'42 mm/hr',p:88,c:'var(--blue)'},temp:{v:'27°C',p:28,c:'var(--blue-light)'},wind:{v:'38 km/h',p:54,c:'var(--orange)'},flood:{v:'Moderate',p:48,c:'var(--yellow)'},aqi:{v:'92 – Good',p:24,c:'var(--green)'}},
+    affected:[0,1,3,4,6], label:'Heavy Rain'
+  },
+  heat: {
+    imd:{rain:{v:'0 mm/hr',p:0,c:'var(--blue)'},temp:{v:'45°C',p:96,c:'var(--red)'},wind:{v:'6 km/h',p:8,c:'var(--muted)'},flood:{v:'Low',p:4,c:'var(--green)'},aqi:{v:'142 – Moderate',p:56,c:'var(--yellow)'}},
+    affected:[1,2,4,5,7,8], label:'Extreme Heat'
+  },
+  flood: {
+    imd:{rain:{v:'68 mm/hr',p:100,c:'var(--red)'},temp:{v:'25°C',p:24,c:'var(--green)'},wind:{v:'72 km/h',p:95,c:'var(--red)'},flood:{v:'🔴 CRITICAL',p:100,c:'var(--red)'},aqi:{v:'178 – Poor',p:72,c:'var(--orange)'}},
+    affected:[0,1,2,3,4,5,6], label:'Flood Alert'
+  }
+};
+
+// ── STATE ─────────────────────────────────────────────────────
+let curSc = 'rain', simRunning = false;
+
+// ── PILL CLICKS ───────────────────────────────────────────────
+['rain','heat','flood'].forEach(s=>{
+  document.getElementById('pill-'+s).addEventListener('click', function(){
+    if(simRunning) return;
+    curSc = s;
+    document.querySelectorAll('.sc-pill').forEach(p=>p.className='sc-pill');
+    this.className='sc-pill sel-'+s;
+    resetAll();
+  });
+});
+document.getElementById('simBtn').addEventListener('click', runSim);
+
+// ── INIT RIDER DOTS ───────────────────────────────────────────
+function initDots(){
+  const c = document.getElementById('riderDots');
+  c.innerHTML='';
+  for(let i=0;i<TOTAL_RIDERS;i++){
+    const d=document.createElement('div');
+    d.className='rider-dot'; d.id='rd'+i;
+    d.style.background='rgba(255,255,255,0.14)';
+    c.appendChild(d);
+  }
+}
+initDots();
+
+// ── ZONE TABLE ────────────────────────────────────────────────
+function renderZoneTable(affected=[]){
+  const t=document.getElementById('zoneTable');
+  t.innerHTML='';
+  ZONES.forEach((z,i)=>{
+    const isAff=affected.includes(i);
+    const score=isAff?(6+Math.floor(Math.random()*22)):(58+Math.floor(Math.random()*38));
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);font-size:0.75rem;gap:6px;';
+    row.innerHTML=`<span style="color:var(--muted);flex:1">${z.name}</span><span style="color:var(--muted)">${z.pin}</span><span style="color:var(--white)">${z.riders} riders</span><span style="font-weight:700;color:${isAff?'var(--red)':'var(--green)'}">${score}/100</span><span style="padding:2px 7px;border-radius:50px;font-size:0.66rem;font-weight:600;background:${isAff?'rgba(255,71,87,0.15)':'rgba(0,214,143,0.12)'};color:${isAff?'var(--red)':'var(--green)'}">${isAff?'⛔ Unsafe':'✅ Clear'}</span>`;
+    t.appendChild(row);
+  });
+}
+renderZoneTable([]);
+
+// ── MAIN SIM ──────────────────────────────────────────────────
+async function runSim(){
+  if(simRunning) return;
+  simRunning=true;
+  const btn=document.getElementById('simBtn');
+  btn.disabled=true; btn.textContent='⏳ Running...';
+
+  const sc=SC[curSc];
+  const affZones=sc.affected;
+  let affRiders=0;
+  affZones.forEach(zi=>affRiders+=ZONES[zi].riders);
+  const clrRiders=TOTAL_RIDERS-affRiders;
+  const rawPay=Math.floor(RISK_POOL/affRiders);
+  const payEach=Math.min(rawPay, 300); // capped at ₹300
+  const totPaid=payEach*affRiders;
+  const poolRemaining=RISK_POOL-totPaid;
+  const rName=(user.name||'Rahul Kumar').split(' ')[0];
+  const userPin=user.pin||'600001';
+  const userStation=user.station||'Nungambakkam IMD Station';
+
+  if(curSc==='rain'||curSc==='flood') startRain();
+
+  // ── Step 1: IMD Data
+  await tick('ts1',900);
+  document.getElementById('td1').textContent=`Live data received from ${userStation} · Zone ${userPin}.`;
+  updateIMD(sc.imd);
+
+  // ── Step 2: AI Score
+  await tick('ts2',1300);
+  document.getElementById('td2').textContent=`Workability Score per zone computed. ${affZones.length} zones scored below threshold.`;
+  colorZones(affZones);
+
+  // ── Step 3: Flag zones
+  await tick('ts3',900);
+  document.getElementById('td3').textContent=`Score: ${8+Math.floor(Math.random()*15)}/100. Conditions classified UNSAFE for zones: ${affZones.map(i=>ZONES[i].name).join(', ')}.`;
+  renderZoneTable(affZones);
+  document.getElementById('affCount').textContent=affRiders+' riders';
+  document.getElementById('clrCount').textContent=clrRiders+' riders';
+  document.getElementById('distBadge').textContent=affRiders+' affected';
+  document.getElementById('distBadge').style.background='rgba(255,71,87,0.15)';
+  document.getElementById('distBadge').style.color='var(--red)';
+  colorDots(affZones);
+
+  // ── Step 4: FRAUD PREVENTION (3 sub-checks)
+  await tick('ts4', 400);
+  document.getElementById('td4').textContent=`Running 3 automated fraud checks on all ${affRiders} affected riders...`;
+  const fraudBox = document.getElementById('fraudChecks');
+  fraudBox.style.display='flex';
+
+  // Check 1 – platform activity
+  await delay(700);
+  document.getElementById('fc1').classList.add('pass');
+  document.getElementById('fc1').querySelector('.fc-icon').textContent='✅';
+  document.getElementById('fc1d').textContent=`Online since 9:04 AM ✓`;
+  document.getElementById('fc1d').style.color='var(--green)';
+  const b1=document.getElementById('fc1b'); b1.textContent='PASS'; b1.className='fc-badge pass';
+
+  // Check 2 – GPS zone
+  await delay(600);
+  document.getElementById('fc2').classList.add('pass');
+  document.getElementById('fc2').querySelector('.fc-icon').textContent='✅';
+  document.getElementById('fc2d').textContent=`Zone ${userPin} confirmed ✓`;
+  document.getElementById('fc2d').style.color='var(--green)';
+  const b2=document.getElementById('fc2b'); b2.textContent='PASS'; b2.className='fc-badge pass';
+
+  // Check 3 – work pattern
+  await delay(600);
+  document.getElementById('fc3').classList.add('pass');
+  document.getElementById('fc3').querySelector('.fc-icon').textContent='✅';
+  document.getElementById('fc3d').textContent=`Regularly works this time slot ✓`;
+  document.getElementById('fc3d').style.color='var(--green)';
+  const b3=document.getElementById('fc3b'); b3.textContent='PASS'; b3.className='fc-badge pass';
+
+  await delay(400);
+  document.getElementById('fraudResult').style.display='block';
+
+  // ── Step 5: Dynamic payout formula
+  await tick('ts5',800);
+  document.getElementById('td5').textContent=`₹${payEach} per rider calculated from pool (${affRiders} affected).`;
+  document.getElementById('perRider').textContent='₹'+payEach;
+
+  // Animate formula reveal
+  const formulaReveal=document.getElementById('formulaReveal');
+  formulaReveal.style.display='block';
+  const formulaSteps=document.getElementById('formulaSteps');
+  const isCapped = rawPay > 300;
+  formulaSteps.innerHTML=`
+    <span style="color:var(--muted)">Risk Pool</span> <span style="color:var(--blue-light);font-weight:600">₹${RISK_POOL}</span>
+    <span style="color:var(--muted)"> × 70%</span>
+    <span style="color:var(--muted)"> ÷ </span>
+    <span style="color:var(--red);font-weight:600">${affRiders} affected riders</span>`;
+  await delay(600);
+  document.getElementById('formulaFinal').style.display='block';
+  document.getElementById('formulaFinal').textContent=`= ₹${payEach} per rider`;
+  document.getElementById('formulaCap').textContent=
+    `Within pool capacity · No insurer needed · Capped at max ₹300${isCapped?' (raw ₹'+rawPay+' → capped)':''}`;
+
+  document.getElementById('formulaBox').innerHTML=
+    `<span>Risk Pool ₹${RISK_POOL}</span> ÷ <span>${affRiders} affected riders</span> = <span>₹${payEach}/rider</span> (capped ₹300)<br>`+
+    `Total: <span>₹${totPaid}</span> · Pool remaining: <span>₹${poolRemaining}</span><br>`+
+    `<span>${clrRiders} clear riders</span> → ₹10 savings each → withdraw anytime`;
+  document.getElementById('cbVal').textContent='₹10 × '+clrRiders+' = ₹'+clrRiders*10+' (withdraw anytime)';
+
+  // ── Step 6: Released from pool
+  await tick('ts6',1100);
+  document.getElementById('td6').textContent=`₹${totPaid} total deducted from Risk Pool. Pool remaining: ₹${poolRemaining}.`;
+
+  // ── Step 7: Credited
+  await tick('ts7',700);
+  document.getElementById('td7').textContent=`₹${payEach} credited to ${rName}'s account. WhatsApp alert sent! 🎉`;
+
+  // Show result
+  await delay(350);
+  document.getElementById('prAmt').textContent='₹'+payEach;
+  document.getElementById('pmAff').textContent=affRiders;
+  document.getElementById('pmTot').textContent='₹'+totPaid;
+  document.getElementById('cnTitle').textContent=clrRiders+' clear riders → ₹'+clrRiders*10+' in savings (withdraw anytime)';
+  document.getElementById('payoutResult').style.display='block';
+
+  simRunning=false;
+  btn.disabled=false;
+  btn.textContent='✅ Simulation Complete';
+}
+
+// ── HELPERS ───────────────────────────────────────────────────
+function updateIMD(imd){
+  const fields=[['iRain','bRain',imd.rain],['iTemp','bTemp',imd.temp],['iWind','bWind',imd.wind],['iFlood','bFlood',imd.flood],['iAqi','bAqi',imd.aqi]];
+  fields.forEach(([vid,bid,d])=>{
+    document.getElementById(vid).textContent=d.v;
+    document.getElementById(bid).style.cssText=`width:${d.p}%;background:${d.c}`;
+  });
+}
+
+function colorZones(affZones){
+  for(let i=0;i<9;i++){
+    const r=document.getElementById('z'+(i+1));
+    if(!r) return;
+    if(affZones.includes(i)){
+      r.setAttribute('fill','rgba(255,71,87,0.2)');
+      r.setAttribute('stroke','rgba(255,71,87,0.7)');
+    } else {
+      r.setAttribute('fill','rgba(0,214,143,0.1)');
+      r.setAttribute('stroke','rgba(0,214,143,0.55)');
+    }
+  }
+}
+
+function colorDots(affZones){
+  let off=0;
+  ZONES.forEach((z,i)=>{
+    const aff=affZones.includes(i);
+    for(let r=0;r<z.riders;r++){
+      const d=document.getElementById('rd'+(off+r));
+      if(d){ d.style.background=aff?'var(--red)':'var(--green)'; d.style.transform=aff?'scale(1.35)':'scale(1)'; }
+    }
+    off+=z.riders;
+  });
+}
+
+const STEP_ICONS=['📡','🧠','🗺️','🔍','🧮','💸','✅'];
+const STEP_IDS=['ts1','ts2','ts3','ts4','ts5','ts6','ts7'];
+async function tick(id, ms){
+  const idx=STEP_IDS.indexOf(id);
+  if(idx>0){
+    const prev=document.getElementById(STEP_IDS[idx-1]);
+    prev.classList.remove('active'); prev.classList.add('done');
+    prev.querySelector('.t-dot').textContent='✓';
+  }
+  document.getElementById(id).classList.add('active');
+  await delay(ms);
+}
+function delay(ms){return new Promise(r=>setTimeout(r,ms));}
+
+// ── RESET ─────────────────────────────────────────────────────
+function resetAll(){
+  simRunning=false; stopRain();
+  const btn=document.getElementById('simBtn');
+  btn.disabled=false; btn.textContent='🚀 Trigger Scenario';
+  document.getElementById('payoutResult').style.display='none';
+  document.getElementById('affCount').textContent='—';
+  document.getElementById('clrCount').textContent='—';
+  document.getElementById('perRider').textContent='—';
+  document.getElementById('formulaBox').textContent='Select a scenario and trigger to see the live calculation.';
+  document.getElementById('cbVal').textContent='₹10 · withdraw anytime';
+  document.getElementById('distBadge').textContent='Waiting';
+  document.getElementById('distBadge').style.background='';
+  document.getElementById('distBadge').style.color='';
+
+  // Reset fraud checks
+  document.getElementById('fraudChecks').style.display='none';
+  document.getElementById('fraudResult').style.display='none';
+  document.getElementById('formulaReveal').style.display='none';
+  document.getElementById('formulaFinal').style.display='none';
+  const fcDetails=['Checking platform login data...','Verifying GPS coordinates...','Comparing against historical ride schedule...'];
+  [1,2,3].forEach(n=>{
+    const fc=document.getElementById('fc'+n);
+    fc.classList.remove('pass');
+    fc.querySelector('.fc-icon').textContent='⏳';
+    document.getElementById('fc'+n+'d').textContent=fcDetails[n-1];
+    document.getElementById('fc'+n+'d').style.color='';
+    const b=document.getElementById('fc'+n+'b'); b.textContent='—'; b.className='fc-badge pending';
+  });
+
+  STEP_IDS.forEach((id,i)=>{
+    const el=document.getElementById(id);
+    el.classList.remove('active','done');
+    el.querySelector('.t-dot').textContent=STEP_ICONS[i];
+  });
+  for(let i=1;i<=9;i++){
+    const r=document.getElementById('z'+i);
+    if(r){ r.setAttribute('fill','rgba(0,214,143,0.07)'); r.setAttribute('stroke','rgba(0,214,143,0.35)'); }
+  }
+  renderZoneTable([]);
+  initDots();
+  document.getElementById('iRain').textContent='2 mm/hr';  document.getElementById('bRain').style.cssText='width:5%;background:var(--blue)';
+  document.getElementById('iTemp').textContent='31°C';     document.getElementById('bTemp').style.cssText='width:42%;background:var(--yellow)';
+  document.getElementById('iWind').textContent='14 km/h';  document.getElementById('bWind').style.cssText='width:18%;background:var(--green)';
+  document.getElementById('iFlood').textContent='Low';     document.getElementById('bFlood').style.cssText='width:5%;background:var(--green)';
+  document.getElementById('iAqi').textContent='88 – Good'; document.getElementById('bAqi').style.cssText='width:22%;background:var(--green)';
+}
+
+// ── RAIN FX ───────────────────────────────────────────────────
+let rdrops=[];
+function startRain(){
+  const ov=document.getElementById('rainOverlay');
+  ov.style.display='block';
+  for(let i=0;i<55;i++){
+    const d=document.createElement('div'); d.className='rdrop';
+    d.style.left=Math.random()*100+'vw';
+    d.style.height=(35+Math.random()*55)+'px';
+    d.style.animationDuration=(0.5+Math.random()*0.9)+'s';
+    d.style.animationDelay=Math.random()*2+'s';
+    d.style.opacity=0.35+Math.random()*0.35;
+    ov.appendChild(d); rdrops.push(d);
+  }
+}
+function stopRain(){
+  document.getElementById('rainOverlay').style.display='none';
+  rdrops.forEach(d=>d.remove()); rdrops=[];
+}
+</script>
+</body>
+</html>
+<!-- ARIA-Gig causation model integration -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Add ARIA link to sidebar
+  const sidebar = document.querySelector('.sidebar');
+  if (sidebar) {
+    const bottom = sidebar.querySelector('.sidebar-bottom');
+    const ariaLink = document.createElement('a');
+    ariaLink.href = '/';
+    ariaLink.className = 'nav-item';
+    ariaLink.innerHTML = '<span class="icon">🤖</span> ARIA Analytics';
+    ariaLink.style.color = '#ffd166';
+    sidebar.insertBefore(ariaLink, bottom);
+  }
+
+  // Add causation formula explainer below bottom-grid
+  const main = document.querySelector('.main');
+  if (!main) return;
+
+  const formulaCard = document.createElement('div');
+  formulaCard.style.cssText = 'margin-top:18px;';
+  formulaCard.innerHTML = `
+    <div style="background:rgba(30,111,255,0.05);border:1px solid rgba(30,111,255,0.15);border-radius:18px;padding:22px;">
+      <div style="font-family:'Syne',sans-serif;font-size:0.97rem;font-weight:700;color:#fff;margin-bottom:16px;">
+        🧠 ARIA-Gig Risk Models — Live Formula Reference
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;">
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px;">
+          <div style="font-size:0.7rem;color:#3d8bff;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Earnings Deficit Index</div>
+          <div style="font-family:'Syne',sans-serif;font-size:0.85rem;color:#e8eaf0;line-height:1.7;">
+            EDI = Expected Earnings − Actual Earnings
+          </div>
+          <div style="font-size:0.7rem;color:#7a8096;margin-top:6px;">Used to calculate payout tier and compensation amount</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px;">
+          <div style="font-size:0.7rem;color:#ffd166;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Causation Score</div>
+          <div style="font-family:'Syne',sans-serif;font-size:0.78rem;color:#e8eaf0;line-height:2;">
+            0.40 × Environment<br>
+            + 0.30 × Peer Trends<br>
+            + 0.30 × Demand<br>
+            − 0.25 × Individual Dev.
+          </div>
+          <div style="font-size:0.7rem;color:#7a8096;margin-top:6px;">≥ 0.4 + Workability &lt; 50 → Systemic loss confirmed</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px;">
+          <div style="font-size:0.7rem;color:#00d68f;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Payout Tiers</div>
+          <div style="font-size:0.78rem;color:#e8eaf0;line-height:2.2;">
+            <span style="color:#ffd166;">T1</span> 20–35% loss → 50% of EDI<br>
+            <span style="color:#ff8c5a;">T2</span> 35–55% loss → 65% of EDI<br>
+            <span style="color:#ff6b2b;">T3</span> 55–75% loss → 75% of EDI<br>
+            <span style="color:#ff4757;">T4</span> 75–100% loss → 85% of EDI
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px;">
+          <div style="font-size:0.7rem;color:#ff6b2b;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Workability Index</div>
+          <div style="font-size:0.78rem;color:#e8eaf0;line-height:2.1;">
+            0.30 × Weather Score<br>
+            + 0.25 × AQI Score<br>
+            + 0.20 × Fuel Score<br>
+            + 0.25 × Demand Score<br>
+            <span style="color:#ff4757;">× Geo-Political Modifier</span>
+          </div>
+          <div style="font-size:0.7rem;color:#7a8096;margin-top:6px;">Score &lt; 50 triggers auto-payout evaluation</div>
+        </div>
+      </div>
+    </div>
+  `;
+  main.appendChild(formulaCard);
+});
+</script>

@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARIA-Gig | Income Shock Visualizer</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#040d1a; --navy2:#071428; --navy3:#0c1f3f;
+  --blue:#1e6fff; --blue-l:#3d8bff;
+  --teal:#2dd4bf; --teal-l:#5eead4;
+  --orange:#ff6b2b; --amber:#fbbf24;
+  --green:#22c55e; --green-l:#4ade80;
+  --red:#f43f5e; --red-l:#fb7185;
+  --card:rgba(255,255,255,0.04); --border:rgba(255,255,255,0.07);
+  --text:#e2e8f0; --muted:#64748b; --white:#fff;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 30%,rgba(45,212,191,0.06) 0%,transparent 50%),radial-gradient(ellipse at 80% 70%,rgba(244,63,94,0.04) 0%,transparent 50%);pointer-events:none;z-index:0;}
+
+/* SIDEBAR */
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:220px;background:var(--navy2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;padding:20px 0;}
+.s-logo{padding:0 20px 20px;border-bottom:1px solid var(--border);margin-bottom:12px;}
+.s-logo-inner{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:#fff;display:flex;align-items:center;gap:8px;}
+.s-logo-inner span{color:var(--teal);}
+.s-badge{margin-top:8px;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.25);border-radius:20px;font-size:0.68rem;color:var(--amber);font-weight:600;}
+.dot-pulse{width:5px;height:5px;border-radius:50%;background:var(--amber);animation:pulse 1.5s infinite;}
+.nav-link{display:flex;align-items:center;gap:10px;padding:11px 20px;color:var(--muted);font-size:0.83rem;cursor:pointer;transition:all 0.2s;border-left:2px solid transparent;text-decoration:none;}
+.nav-link:hover{color:#fff;background:var(--card);}
+.nav-link.active{color:var(--teal);background:rgba(45,212,191,0.08);border-left-color:var(--teal);}
+.nav-link .ni{font-size:0.95rem;width:18px;text-align:center;}
+.s-section{padding:6px 20px 4px;font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em;font-weight:700;margin-top:8px;}
+.s-bottom{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border);}
+.persona-mini{display:flex;align-items:center;gap:10px;}
+.persona-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.persona-name{font-size:0.82rem;color:#fff;font-weight:600;}
+.persona-sub{font-size:0.68rem;color:var(--muted);}
+
+/* MAIN */
+.main{margin-left:220px;padding:28px 32px;position:relative;z-index:1;}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;gap:16px;flex-wrap:wrap;}
+.topbar-left h1{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:#fff;}
+.topbar-left p{font-size:0.83rem;color:var(--muted);margin-top:3px;}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(45,212,191,0.2),transparent);}
+.card-title{font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;color:#fff;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
+
+/* BADGES */
+.badge{padding:3px 8px;border-radius:20px;font-size:0.65rem;font-weight:700;}
+.badge-teal{background:rgba(45,212,191,0.12);color:var(--teal);}
+.badge-amber{background:rgba(251,191,36,0.12);color:var(--amber);}
+.badge-red{background:rgba(244,63,94,0.12);color:var(--red);}
+.badge-green{background:rgba(34,197,94,0.12);color:var(--green);}
+.badge-blue{background:rgba(30,111,255,0.15);color:#93c5fd;}
+
+/* SIM BUTTONS */
+.sim-btn{padding:11px 22px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.25s;display:flex;align-items:center;gap:7px;}
+.sim-btn:hover{transform:translateY(-1px);border-color:rgba(45,212,191,0.3);}
+.sim-btn.s-rain{border-color:rgba(30,111,255,0.5);background:rgba(30,111,255,0.12);color:#93c5fd;}
+.sim-btn.s-flood{border-color:rgba(244,63,94,0.5);background:rgba(244,63,94,0.12);color:var(--red-l);}
+.sim-btn.s-curfew{border-color:rgba(251,191,36,0.5);background:rgba(251,191,36,0.12);color:var(--amber);}
+.sim-btn.s-heat{border-color:rgba(255,107,43,0.5);background:rgba(255,107,43,0.12);color:#fb923c;}
+.sim-btn.s-fuel{border-color:rgba(168,85,247,0.4);background:rgba(168,85,247,0.08);color:#c084fc;}
+
+/* STAT PILLS */
+.stat-pill{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px 18px;text-align:center;}
+.sp-label{font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:6px;}
+.sp-val{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:#fff;line-height:1;}
+.sp-sub{font-size:0.67rem;color:var(--muted);margin-top:4px;}
+
+/* WORKER CARDS */
+.worker-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
+.worker-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px;cursor:pointer;transition:all 0.2s;position:relative;}
+.worker-card:hover,.worker-card.selected{border-color:rgba(45,212,191,0.35);background:rgba(45,212,191,0.05);}
+.worker-card.selected::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--teal),var(--blue));border-radius:12px 12px 0 0;}
+.wc-name{font-weight:700;font-size:0.85rem;color:#fff;margin-bottom:2px;}
+.wc-sub{font-size:0.7rem;color:var(--muted);}
+.wc-gap{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;margin-top:8px;}
+
+/* INSIGHT BOX */
+.insight-box{background:linear-gradient(135deg,rgba(244,63,94,0.08),rgba(251,191,36,0.05));border:1px solid rgba(244,63,94,0.2);border-radius:12px;padding:16px 20px;}
+
+/* HISTORY BARS */
+.hbar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.hbar-label{font-size:0.72rem;color:var(--muted);width:36px;flex-shrink:0;}
+.hbar-track{flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,0.05);overflow:hidden;position:relative;}
+.hbar-exp{height:100%;border-radius:4px;background:rgba(148,163,184,0.25);position:absolute;top:0;left:0;}
+.hbar-act{height:100%;border-radius:4px;background:var(--teal);position:absolute;top:0;left:0;transition:width 1s ease;}
+.hbar-act.gap{background:var(--red);}
+.hbar-val{font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--muted);width:40px;text-align:right;flex-shrink:0;}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.animate-in{animation:fadeSlideIn 0.5s ease forwards;}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="s-logo">
+    <div class="s-logo-inner">⚡ ARIA<span>-Gig</span></div>
+    <div class="s-badge"><div class="dot-pulse"></div>Live Demo Mode</div>
+  </div>
+  <div class="s-section">Simulation</div>
+  <a class="nav-link" href="demo.html"><span class="ni">🎬</span> Demo Engine</a>
+  <a class="nav-link" href="simulation.html"><span class="ni">⚡</span> Payout Sim</a>
+  <div class="s-section">Dashboards</div>
+  <a class="nav-link" href="dashboard.html"><span class="ni">🛵</span> Worker View</a>
+  <a class="nav-link" href="/"><span class="ni">📊</span> ARIA Analytics</a>
+  <a class="nav-link" href="/admin"><span class="ni">🔧</span> Admin Panel</a>
+  <div class="s-section">Features</div>
+  <a class="nav-link active" href="income-shock.html"><span class="ni">📉</span> Income Shock</a>
+  <a class="nav-link" href="fraud.html"><span class="ni">🔍</span> Fraud Detection</a>
+  <a class="nav-link" href="history.html"><span class="ni">📋</span> History & ROI</a>
+  <a class="nav-link" href="home.html"><span class="ni">🏠</span> Home</a>
+  <div class="s-bottom">
+    <div class="persona-mini">
+      <div class="persona-av">🏍️</div>
+      <div>
+        <div class="persona-name">Ravi Kumar</div>
+        <div class="persona-sub">Bengaluru · Swiggy</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>📉 Income Shock Visualizer</h1>
+      <p>Real-time gap between expected earnings and actual earnings — Ravi Kumar, Bengaluru</p>
+      <div style="margin-top:10px;display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:linear-gradient(135deg,rgba(244,63,94,0.1),rgba(251,191,36,0.06));border:1px solid rgba(244,63,94,0.25);border-radius:50px;">
+        <span style="font-size:0.9rem;">⚡</span>
+        <span style="font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:700;color:#fb7185;letter-spacing:0.02em;">This is not insurance. This is a real-time income protection engine.</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:50px;border:1px solid rgba(34,197,94,0.3);background:rgba(34,197,94,0.08);font-size:0.75rem;font-weight:600;color:var(--green);">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;"></div>ARIA Engine Online
+      </div>
+      <span class="badge badge-blue" id="globalBadge">No Disruption</span>
+    </div>
+  </div>
+
+  <!-- EMOTIONAL IMPACT BANNER -->
+  <div id="emotionalBanner" style="display:none;margin-bottom:22px;animation:fadeSlideIn 0.6s ease;">
+    <div style="background:linear-gradient(135deg,rgba(244,63,94,0.12),rgba(251,191,36,0.07));border:1px solid rgba(244,63,94,0.3);border-radius:14px;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <span style="font-size:2rem;">💔</span>
+        <div>
+          <div id="emotionalText" style="font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:800;color:#fff;line-height:1.3;"></div>
+          <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">Auto-detected · No claim filed · Protected in 4.2 seconds</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 20px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);border-radius:50px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 1.5s infinite;"></span>
+        <span style="font-size:0.8rem;font-weight:700;color:var(--green);font-family:'Syne',sans-serif;">PROTECTED</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENARIO TRIGGER BAR -->
+  <div style="background:rgba(45,212,191,0.04);border:1px solid rgba(45,212,191,0.12);border-radius:14px;padding:18px 22px;margin-bottom:24px;">
+    <div style="font-size:0.72rem;color:var(--teal);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:14px;">⚡ Trigger an Income Shock Event — watch the gap appear in real time</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="sim-btn" id="btn-rain"   onclick="applyScenario('rain')">🌧️ Heavy Rain</button>
+      <button class="sim-btn" id="btn-flood"  onclick="applyScenario('flood')">🌊 Flash Flood</button>
+      <button class="sim-btn" id="btn-curfew" onclick="applyScenario('curfew')">🚫 Curfew</button>
+      <button class="sim-btn" id="btn-heat"   onclick="applyScenario('heat')">🌡️ Heat Wave</button>
+      <button class="sim-btn" id="btn-fuel"   onclick="applyScenario('fuel')">⛽ Fuel Spike</button>
+      <button class="sim-btn" onclick="resetAll()" style="margin-left:auto;">↺ Reset</button>
+    </div>
+  </div>
+
+  <!-- MAIN CHART — HERO -->
+  <div class="card" style="margin-bottom:20px;padding:24px 28px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:#fff;">Expected vs Actual Earnings — This Week</div>
+        <div style="font-size:0.77rem;color:var(--muted);margin-top:3px;">Ravi Kumar · Swiggy delivery partner · Bengaluru</div>
+      </div>
+      <div style="display:flex;gap:18px;align-items:center;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <svg width="26" height="12"><line x1="0" y1="6" x2="26" y2="6" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,3"/></svg>
+          <span style="font-size:0.72rem;color:#94a3b8;">Expected (₹850/day)</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <div style="width:26px;height:3px;background:#2dd4bf;border-radius:2px;"></div>
+          <span style="font-size:0.72rem;color:#94a3b8;">Actual earnings</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <div style="width:16px;height:14px;background:rgba(244,63,94,0.38);border-radius:3px;"></div>
+          <span style="font-size:0.72rem;color:#fb7185;font-weight:700;">Income Gap</span>
+        </div>
+      </div>
+    </div>
+    <!-- HERO CANVAS -->
+    <canvas id="heroCanvas" style="width:100%;display:block;border-radius:10px;" height="240"></canvas>
+    <!-- Y-axis labels rendered separately -->
+    <div id="yLabels" style="display:flex;justify-content:space-between;margin-top:6px;padding:0 8px;">
+      <span style="font-size:0.65rem;color:#475569;font-family:'JetBrains Mono',monospace;" id="yMin"></span>
+      <span style="font-size:0.7rem;color:var(--muted);" id="scenarioLabel">Normal earnings week</span>
+      <span style="font-size:0.65rem;color:#475569;font-family:'JetBrains Mono',monospace;" id="yMax"></span>
+    </div>
+  </div>
+
+  <!-- STATS ROW -->
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px;" id="statsRow">
+    <div class="stat-pill">
+      <div class="sp-label">Expected Today</div>
+      <div class="sp-val" style="color:#fff;" id="st-expected">₹850</div>
+      <div class="sp-sub">Daily baseline</div>
+    </div>
+    <div class="stat-pill">
+      <div class="sp-label">Actual Earned</div>
+      <div class="sp-val" style="color:#2dd4bf;" id="st-actual">₹820</div>
+      <div class="sp-sub" id="st-actual-sub">Near baseline</div>
+    </div>
+    <div class="stat-pill" id="pill-gap">
+      <div class="sp-label">Income Gap</div>
+      <div class="sp-val" style="color:#f43f5e;" id="st-gap">₹30</div>
+      <div class="sp-sub">Loss today</div>
+    </div>
+    <div class="stat-pill">
+      <div class="sp-label">Auto-Payout</div>
+      <div class="sp-val" style="color:#22c55e;" id="st-payout">—</div>
+      <div class="sp-sub" id="st-payout-sub">Awaiting trigger</div>
+    </div>
+    <div class="stat-pill">
+      <div class="sp-label">Coverage %</div>
+      <div class="sp-val" style="color:#fbbf24;" id="st-coverage">—</div>
+      <div class="sp-sub">Of gap covered</div>
+    </div>
+  </div>
+
+  <!-- BOTTOM ROW -->
+  <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:18px;">
+
+    <!-- Daily bar comparison -->
+    <div class="card">
+      <div class="card-title">📊 Daily Gap Breakdown
+        <span class="badge badge-teal">This Week</span>
+      </div>
+      <div id="dailyBars" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div>
+
+    <!-- Worker comparison -->
+    <div class="card">
+      <div class="card-title">👥 Worker Comparison
+        <span class="badge badge-blue">Bengaluru</span>
+      </div>
+      <div id="workerList" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <div style="margin-top:14px;padding:10px 12px;background:rgba(45,212,191,0.05);border:1px solid rgba(45,212,191,0.12);border-radius:10px;font-size:0.72rem;color:var(--muted);line-height:1.6;" id="workerInsight">
+        During disruptions, workers in North Bengaluru face 2.3× higher income gaps than South Bengaluru.
+      </div>
+    </div>
+
+    <!-- Insight panel -->
+    <div class="card">
+      <div class="card-title">🧠 ARIA Insight
+        <span class="badge badge-amber" id="insightBadge">Standby</span>
+      </div>
+      <div id="insightPanel">
+        <div style="text-align:center;padding:24px 0;color:var(--muted);">
+          <div style="font-size:2rem;margin-bottom:10px;">💤</div>
+          <div style="font-size:0.8rem;">No disruption detected.<br>Ravi is earning normally.</div>
+        </div>
+      </div>
+      <!-- Timeline of protection steps -->
+      <div id="protectionTimeline" style="display:none;margin-top:12px;display:none;flex-direction:column;gap:6px;"></div>
+    </div>
+
+  </div>
+
+  <!-- QUOTE -->
+  <div style="margin-top:22px;text-align:center;padding:28px;background:linear-gradient(135deg,rgba(45,212,191,0.06),rgba(30,111,255,0.04));border:1px solid rgba(45,212,191,0.12);border-radius:16px;" id="quoteBox">
+    <div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:#fff;line-height:1.5;" id="quoteText">
+      Trigger an event above to see<br>the income gap appear — and watch ARIA close it.
+    </div>
+    <div style="font-size:0.78rem;color:var(--muted);margin-top:8px;" id="quoteSub">Real-time parametric protection</div>
+  </div>
+
+</div>
+
+<script>
+// ── DATA ────────────────────────────────────────────
+const BASE_ACTUAL   = [820, 890, 780, 850, 820, 760, 820];
+const BASE_EXPECTED = [850, 850, 850, 850, 850, 850, 850];
+const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const TODAY = 4; // Friday
+
+const SCENARIOS = {
+  rain:   { actual:470, payout:247, label:'Heavy Rain', color:'#3d8bff', icon:'🌧️',
+            desc:'Reduced demand and dangerous roads cut Ravi\'s deliveries from 18 to 8.',
+            steps:['Rain detected via IMD API','Delivery demand dropped 45%','EDI threshold crossed: −₹380','Causation score: 71% systemic','Auto-payout ₹247 triggered','Funds in Ravi\'s UPI in 4.2s'] },
+  flood:  { actual:230, payout:527, label:'Flash Flood', color:'#f43f5e', icon:'🌊',
+            desc:'Flooding shut down 3 major routes. Ravi completed only 3 deliveries all day.',
+            steps:['Flood alert: BBMP zone 3','Route blockages confirmed via GPS','EDI: −₹620 — Tier 3 payout','Fraud check: 3/3 passed','Max payout ₹527 disbursed','Alert sent to 1,420 affected workers'] },
+  curfew: { actual:360, payout:318, label:'Curfew / Protest', color:'#fbbf24', icon:'🚫',
+            desc:'Night curfew reduced working hours. Systemic — 68% of zone affected.',
+            steps:['Curfew notice: 8PM–6AM','Platform orders dropped 62%','Workability score: 28','Causation: 64% — systemic','Tier 2 payout ₹318 approved','Disbursed to 890 workers'] },
+  heat:   { actual:570, payout:182, label:'Heat Wave', color:'#fb923c', icon:'🌡️',
+            desc:'43°C heat advisory. Deliveries dropped but not as severely.',
+            steps:['Temp alert: 43°C sustained','AQI 210 — health risk triggered','EDI: −₹280 — Tier 1 payout','Causation: 52% systemic','Auto-payout ₹182 processed','Heat relief protocol activated'] },
+  fuel:   { actual:655, payout:127, label:'Fuel Price Spike', color:'#c084fc', icon:'⛽',
+            desc:'Fuel up ₹18/litre. Operating costs eroded net earnings significantly.',
+            steps:['Fuel index spike detected','Net earnings margin compressed','EDI calculated: −₹195 net','Platform cost-basis adjusted','Payout ₹127 (cost offset)','Policy updated for next week'] },
+};
+
+let activeScenario = null;
+
+// ── RENDER HERO CANVAS ──────────────────────────────
+function drawHeroChart(sc = null) {
+  const canvas = document.getElementById('heroCanvas');
+  if (!canvas) return;
+  const DPR  = window.devicePixelRatio || 1;
+  const rect  = canvas.getBoundingClientRect();
+  const cssW  = rect.width  || 800;
+  const cssH  = 240;
+  canvas.width  = cssW * DPR;
+  canvas.height = cssH * DPR;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(DPR, DPR);
+
+  const actualData = sc
+    ? [820, 890, 780, 850, sc.actual, Math.round(sc.actual*0.83), Math.round(sc.actual*0.75)]
+    : [...BASE_ACTUAL];
+  const expData = [...BASE_EXPECTED];
+
+  const n    = DAYS.length;
+  const padL = 52, padR = 20, padT = 20, padB = 36;
+  const cW   = cssW - padL - padR;
+  const cH   = cssH - padT - padB;
+
+  const allV = [...expData, ...actualData];
+  const minV = Math.min(...allV) * 0.84;
+  const maxV = Math.max(...allV) * 1.06;
+
+  const px = i => padL + (i / (n-1)) * cW;
+  const py = v => padT + cH - ((v - minV) / (maxV - minV)) * cH;
+
+  // Y-axis labels
+  const ySteps = 5;
+  for (let s = 0; s <= ySteps; s++) {
+    const v = minV + (s / ySteps) * (maxV - minV);
+    const y = padT + cH - (s / ySteps) * cH;
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + cW, y); ctx.stroke();
+    ctx.fillStyle = '#334155';
+    ctx.font = '9px "JetBrains Mono",monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText('₹' + Math.round(v), padL - 6, y + 3);
+  }
+
+  // X-axis
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(padL, padT+cH); ctx.lineTo(padL+cW, padT+cH); ctx.stroke();
+
+  // Today vertical line
+  if (sc) {
+    ctx.save();
+    ctx.setLineDash([4,3]);
+    ctx.strokeStyle = 'rgba(251,113,133,0.25)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(px(TODAY), padT);
+    ctx.lineTo(px(TODAY), padT + cH);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Gap fill
+  if (sc) {
+    ctx.beginPath();
+    ctx.moveTo(px(0), py(expData[0]));
+    for (let i = 1; i < n; i++) ctx.lineTo(px(i), py(expData[i]));
+    for (let i = n-1; i >= 0; i--) ctx.lineTo(px(i), py(actualData[i]));
+    ctx.closePath();
+    const grd = ctx.createLinearGradient(0, padT, 0, padT+cH);
+    grd.addColorStop(0, 'rgba(244,63,94,0.45)');
+    grd.addColorStop(0.6, 'rgba(244,63,94,0.15)');
+    grd.addColorStop(1, 'rgba(244,63,94,0.02)');
+    ctx.fillStyle = grd;
+    ctx.fill();
+  }
+
+  // Expected line
+  ctx.save();
+  ctx.setLineDash([7,4]);
+  ctx.strokeStyle = 'rgba(148,163,184,0.60)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(px(0), py(expData[0]));
+  for (let i = 1; i < n; i++) ctx.lineTo(px(i), py(expData[i]));
+  ctx.stroke();
+  ctx.restore();
+
+  // Actual line
+  ctx.strokeStyle = '#2dd4bf';
+  ctx.lineWidth = 3;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(px(0), py(actualData[0]));
+  for (let i = 1; i < n; i++) ctx.lineTo(px(i), py(actualData[i]));
+  ctx.stroke();
+
+  // Dots + tooltips
+  for (let i = 0; i < n; i++) {
+    const x = px(i), y = py(actualData[i]);
+    const gap = expData[i] - actualData[i];
+    const isToday = i === TODAY;
+    const dotCol = isToday && sc && gap > 50
+      ? (gap > 300 ? '#f43f5e' : gap > 150 ? '#fbbf24' : '#fb923c')
+      : '#2dd4bf';
+
+    // Pulse ring for today
+    if (isToday && sc && gap > 50) {
+      ctx.beginPath();
+      ctx.arc(x, y, 14, 0, Math.PI*2);
+      ctx.strokeStyle = dotCol === '#f43f5e' ? 'rgba(244,63,94,0.2)' : 'rgba(251,191,36,0.2)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x, y, 9, 0, Math.PI*2);
+      ctx.strokeStyle = dotCol === '#f43f5e' ? 'rgba(244,63,94,0.35)' : 'rgba(251,191,36,0.35)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    ctx.beginPath();
+    ctx.arc(x, y, isToday ? 6 : 4, 0, Math.PI*2);
+    ctx.fillStyle = dotCol;
+    ctx.fill();
+
+    // Value label above dot
+    if (sc || i === TODAY) {
+      ctx.fillStyle = isToday ? '#fff' : '#64748b';
+      ctx.font = isToday ? 'bold 10px "JetBrains Mono",monospace' : '9px "JetBrains Mono",monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('₹'+actualData[i], x, y - 12);
+    }
+
+    // Gap bracket + label for today
+    if (isToday && sc && gap > 20) {
+      const ey = py(expData[i]);
+      // Bracket
+      ctx.save();
+      ctx.setLineDash([3,2]);
+      ctx.strokeStyle = 'rgba(251,113,133,0.55)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(x + 10, ey + 3);
+      ctx.lineTo(x + 10, y - 3);
+      ctx.stroke();
+      // Tick marks
+      ctx.setLineDash([]);
+      [[ey+3, 5],[y-3,-5]].forEach(([ty, dir]) => {
+        ctx.beginPath(); ctx.moveTo(x+7, ty); ctx.lineTo(x+13, ty); ctx.stroke();
+      });
+      ctx.restore();
+      // Label
+      ctx.fillStyle = '#fb7185';
+      ctx.font = 'bold 11px "JetBrains Mono",monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText('−₹'+gap, x+16, (ey+y)/2+4);
+      // "GAP" tag
+      const tagX = x + 16, tagY = (ey+y)/2 + 18;
+      ctx.fillStyle = 'rgba(244,63,94,0.18)';
+      ctx.beginPath();
+      ctx.roundRect(tagX-2, tagY-10, 36, 14, 4);
+      ctx.fill();
+      ctx.fillStyle = '#fb7185';
+      ctx.font = 'bold 8px "DM Sans",sans-serif';
+      ctx.fillText('GAP', tagX+2, tagY);
+    }
+  }
+
+  // Expected line label (right side)
+  ctx.fillStyle = 'rgba(148,163,184,0.7)';
+  ctx.font = '9px "DM Sans",sans-serif';
+  ctx.textAlign = 'right';
+  ctx.fillText('₹850 expected', padL + cW - 2, py(850) - 6);
+
+  // Day labels
+  ctx.textAlign = 'center';
+  for (let i = 0; i < n; i++) {
+    const isToday = i === TODAY;
+    ctx.fillStyle = isToday ? '#ffffff' : '#475569';
+    ctx.font = isToday ? 'bold 11px "DM Sans",sans-serif' : '10px "DM Sans",sans-serif';
+    ctx.fillText(DAYS[i] + (isToday ? ' ◀' : ''), px(i), padT + cH + 22);
+  }
+
+  // Update external y labels
+  document.getElementById('yMin').textContent = '₹' + Math.round(minV);
+  document.getElementById('yMax').textContent = '₹' + Math.round(maxV);
+}
+
+// ── DAILY BARS ──────────────────────────────────────
+function drawDailyBars(sc = null) {
+  const actualData = sc
+    ? [820, 890, 780, 850, sc.actual, Math.round(sc.actual*0.83), Math.round(sc.actual*0.75)]
+    : [...BASE_ACTUAL];
+  const maxVal = 1000;
+
+  document.getElementById('dailyBars').innerHTML = DAYS.map((d,i) => {
+    const exp = 850, act = actualData[i];
+    const gap = exp - act;
+    const hasGap = gap > 30;
+    const isToday = i === TODAY;
+    const expPct = (exp / maxVal) * 100;
+    const actPct = (act / maxVal) * 100;
+    const gapColor = isToday && sc && hasGap ? (gap > 300 ? '#f43f5e' : '#fbbf24') : '#2dd4bf';
+    return `
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="font-size:0.72rem;color:${isToday ? '#fff' : 'var(--muted)'};width:30px;font-weight:${isToday ? 700 : 400};flex-shrink:0;">${d}</div>
+        <div style="flex:1;position:relative;height:18px;">
+          <div style="position:absolute;top:4px;left:0;width:${expPct}%;height:10px;border-radius:4px;background:rgba(148,163,184,0.15);"></div>
+          <div style="position:absolute;top:4px;left:0;width:${actPct}%;height:10px;border-radius:4px;background:${gapColor};opacity:${isToday ? 1 : 0.55};transition:width 0.8s ease;"></div>
+          ${hasGap && sc ? `<div style="position:absolute;top:4px;left:${actPct}%;width:${expPct-actPct}%;height:10px;border-radius:0 4px 4px 0;background:rgba(244,63,94,0.35);transition:width 0.8s ease;"></div>` : ''}
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:${hasGap && sc ? '#fb7185' : 'var(--muted)'};width:42px;text-align:right;flex-shrink:0;">${hasGap && sc ? '−₹'+gap : '₹'+act}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── WORKER LIST ─────────────────────────────────────
+function drawWorkerList(sc = null) {
+  const workers = [
+    { name:'Ravi Kumar',   zone:'North · Swiggy', base:850, modifier: sc ? sc.actual : 820, you: true },
+    { name:'Arun Sharma',  zone:'North · Zomato',  base:820, modifier: sc ? Math.round(sc.actual*0.95) : 810 },
+    { name:'Priya Nair',   zone:'South · Swiggy',  base:870, modifier: sc ? Math.round(sc.actual*1.12) : 865 },
+    { name:'Dev Rao',      zone:'East · Dunzo',    base:800, modifier: sc ? Math.round(sc.actual*0.88) : 795 },
+    { name:'Kiran Shetty', zone:'Whitefield · Blinkit', base:890, modifier: sc ? Math.round(sc.actual*1.18) : 882 },
+  ];
+
+  document.getElementById('workerList').innerHTML = workers.map(w => {
+    const gap = w.base - w.modifier;
+    const hasGap = gap > 30 && sc;
+    return `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:${w.you ? 'rgba(45,212,191,0.06)' : 'rgba(255,255,255,0.02)'};border:1px solid ${w.you ? 'rgba(45,212,191,0.2)' : 'rgba(255,255,255,0.04)'};">
+        <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,${w.you ? '#2dd4bf,#1e6fff' : '#475569,#334155'});display:flex;align-items:center;justify-content:center;font-size:0.75rem;flex-shrink:0;">🏍️</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:0.78rem;font-weight:600;color:${w.you ? '#fff' : 'var(--text)'}">${w.name}${w.you ? ' <span style="font-size:0.6rem;color:var(--teal);">(you)</span>' : ''}</div>
+          <div style="font-size:0.65rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${w.zone}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:700;color:${hasGap ? '#fb7185' : '#2dd4bf'};">₹${w.modifier}</div>
+          ${hasGap ? `<div style="font-size:0.6rem;color:#f43f5e;">−₹${gap}</div>` : `<div style="font-size:0.6rem;color:var(--muted);">normal</div>`}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── INSIGHT PANEL ───────────────────────────────────
+function updateInsight(sc = null) {
+  const badge = document.getElementById('insightBadge');
+  const panel = document.getElementById('insightPanel');
+  const tl    = document.getElementById('protectionTimeline');
+
+  if (!sc) {
+    badge.textContent = 'Standby';
+    badge.className = 'badge badge-amber';
+    panel.innerHTML = `<div style="text-align:center;padding:24px 0;color:var(--muted);"><div style="font-size:2rem;margin-bottom:10px;">💤</div><div style="font-size:0.8rem;">No disruption detected.<br>Ravi is earning normally.</div></div>`;
+    tl.style.display = 'none';
+    return;
+  }
+
+  const gap = 850 - sc.actual;
+  badge.textContent = gap > 300 ? '🔴 Critical' : gap > 150 ? '🟡 Moderate' : '🟢 Minor';
+  badge.className = 'badge ' + (gap > 300 ? 'badge-red' : gap > 150 ? 'badge-amber' : 'badge-green');
+
+  panel.innerHTML = `
+    <div class="insight-box" style="margin-bottom:12px;">
+      <div style="font-size:0.68rem;color:#fb7185;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">${sc.icon} ${sc.label} detected</div>
+      <div style="font-size:0.8rem;color:var(--text);line-height:1.6;">${sc.desc}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:0.6rem;color:var(--muted);margin-bottom:4px;">Income Gap</div>
+        <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:#f43f5e;">−₹${gap}</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:0.6rem;color:var(--muted);margin-bottom:4px;">Auto-Protected</div>
+        <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:#22c55e;">₹${sc.payout}</div>
+      </div>
+    </div>
+  `;
+
+  // Protection timeline
+  tl.style.display = 'flex';
+  tl.innerHTML = sc.steps.map((step, i) => `
+    <div style="display:flex;align-items:flex-start;gap:8px;opacity:0;animation:fadeSlideIn 0.4s ease ${i * 0.15}s forwards;">
+      <div style="width:18px;height:18px;border-radius:50%;background:rgba(45,212,191,0.15);border:1px solid rgba(45,212,191,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.6rem;color:var(--teal);font-weight:700;">${i+1}</div>
+      <div style="font-size:0.72rem;color:var(--muted);padding-top:1px;line-height:1.5;">${step}</div>
+    </div>
+  `).join('');
+}
+
+// ── STATS UPDATE ────────────────────────────────────
+function updateStats(sc = null) {
+  const actual = sc ? sc.actual : 820;
+  const gap    = 850 - actual;
+  const payout = sc ? sc.payout : 0;
+  const cov    = payout > 0 ? Math.round((payout / gap) * 100) + '%' : '—';
+
+  document.getElementById('st-actual').textContent = '₹' + actual;
+  document.getElementById('st-actual').style.color = gap > 100 ? '#f43f5e' : '#2dd4bf';
+  document.getElementById('st-actual-sub').textContent = gap > 300 ? 'Severe loss' : gap > 100 ? 'Moderate loss' : 'Near baseline';
+  document.getElementById('st-gap').textContent = gap > 0 ? '₹' + gap : '₹0';
+  document.getElementById('st-gap').style.color = gap > 300 ? '#f43f5e' : gap > 100 ? '#fbbf24' : '#22c55e';
+  document.getElementById('st-payout').textContent = payout > 0 ? '₹' + payout : '—';
+  document.getElementById('st-payout').style.color = payout > 0 ? '#22c55e' : 'var(--muted)';
+  document.getElementById('st-payout-sub').textContent = payout > 0 ? 'Disbursed ✓' : 'Awaiting trigger';
+  document.getElementById('st-coverage').textContent = cov;
+  document.getElementById('st-coverage').style.color = payout > 0 ? '#fbbf24' : 'var(--muted)';
+  document.getElementById('globalBadge').textContent = sc ? (gap > 300 ? '⚠ Severe Shock' : '⚠ Income Gap') : 'No Disruption';
+  document.getElementById('globalBadge').className = 'badge ' + (sc ? (gap > 300 ? 'badge-red' : 'badge-amber') : 'badge-blue');
+}
+
+// ── EMOTIONAL BANNER ────────────────────────────────
+function updateBanner(sc = null) {
+  const banner = document.getElementById('emotionalBanner');
+  if (!sc || sc.payout === 0) { banner.style.display = 'none'; return; }
+  const gap = 850 - sc.actual;
+  document.getElementById('emotionalText').innerHTML =
+    `Ravi lost <span style="color:#f43f5e;">₹${gap}</span> today. We protected <span style="color:#22c55e;">₹${sc.payout}</span> instantly.`;
+  banner.style.display = 'flex';
+}
+
+// ── QUOTE BOX ───────────────────────────────────────
+function updateQuote(sc = null) {
+  const q = document.getElementById('quoteText');
+  const s = document.getElementById('quoteSub');
+  const box = document.getElementById('quoteBox');
+  if (!sc) {
+    q.innerHTML = 'Trigger an event above to see<br>the income gap appear — and watch ARIA close it.';
+    s.textContent = 'Real-time parametric protection';
+    box.style.borderColor = 'rgba(45,212,191,0.12)';
+  } else {
+    q.innerHTML = '"Ravi didn\'t file a claim.<br>The system protected him automatically."';
+    s.textContent = `₹${sc.payout} credited in 4.2 seconds · Zero paperwork · Zero friction`;
+    box.style.borderColor = 'rgba(34,197,94,0.25)';
+    box.style.background = 'linear-gradient(135deg,rgba(34,197,94,0.06),rgba(45,212,191,0.04))';
+  }
+}
+
+// ── SCENARIO APPLY ──────────────────────────────────
+function applyScenario(type) {
+  activeScenario = type;
+  const sc = SCENARIOS[type];
+
+  // Update button styles
+  ['rain','flood','curfew','heat','fuel'].forEach(t => {
+    const btn = document.getElementById('btn-'+t);
+    if (btn) btn.className = 'sim-btn' + (t === type ? ' s-'+t : '');
+  });
+
+  document.getElementById('scenarioLabel').textContent = sc.icon + ' ' + sc.label + ' — income shock active';
+
+  requestAnimationFrame(() => {
+    drawHeroChart(sc);
+    drawDailyBars(sc);
+    drawWorkerList(sc);
+    updateInsight(sc);
+    updateStats(sc);
+    updateBanner(sc);
+    updateQuote(sc);
+  });
+}
+
+// ── RESET ────────────────────────────────────────────
+function resetAll() {
+  activeScenario = null;
+  ['rain','flood','curfew','heat','fuel'].forEach(t => {
+    const btn = document.getElementById('btn-'+t);
+    if (btn) btn.className = 'sim-btn';
+  });
+  document.getElementById('scenarioLabel').textContent = 'Normal earnings week';
+  document.getElementById('emotionalBanner').style.display = 'none';
+  requestAnimationFrame(() => {
+    drawHeroChart(null);
+    drawDailyBars(null);
+    drawWorkerList(null);
+    updateInsight(null);
+    updateStats(null);
+    updateQuote(null);
+  });
+}
+
+// ── INIT ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  requestAnimationFrame(() => {
+    drawHeroChart();
+    drawDailyBars();
+    drawWorkerList();
+    updateInsight();
+    updateStats();
+    updateQuote();
+  });
+});
+
+window.addEventListener('resize', () => {
+  const sc = activeScenario ? SCENARIOS[activeScenario] : null;
+  requestAnimationFrame(() => drawHeroChart(sc));
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-navy-950 text-slate-100 font-sans;
+    background-image: 
+      radial-gradient(ellipse at 15% 50%, rgba(45,212,191,0.05) 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 10%, rgba(251,191,36,0.04) 0%, transparent 55%);
+    min-height: 100vh;
+  }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { @apply bg-navy-900; }
+  ::-webkit-scrollbar-thumb { @apply bg-navy-600 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-teal-600; }
+}
+
+@layer components {
+  .card {
+    @apply bg-navy-900 border border-navy-700 rounded-xl p-5;
+  }
+
+  .card-glow {
+    @apply card;
+    box-shadow: 0 0 0 1px rgba(45,212,191,0.08), 0 4px 24px rgba(0,0,0,0.4);
+    transition: box-shadow 0.3s ease;
+  }
+  .card-glow:hover {
+    box-shadow: 0 0 0 1px rgba(45,212,191,0.2), 0 4px 32px rgba(0,0,0,0.5);
+  }
+
+  .btn-primary {
+    @apply bg-teal-500 hover:bg-teal-400 text-navy-950 font-semibold px-5 py-2.5 rounded-lg transition-all duration-200 text-sm;
+  }
+
+  .btn-secondary {
+    @apply bg-navy-800 hover:bg-navy-700 border border-navy-600 text-slate-200 font-medium px-5 py-2.5 rounded-lg transition-all duration-200 text-sm;
+  }
+
+  .btn-danger {
+    @apply bg-coral-500 hover:bg-coral-400 text-white font-semibold px-5 py-2.5 rounded-lg transition-all duration-200 text-sm;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold;
+  }
+
+  .badge-teal  { @apply badge bg-teal-500/15 text-teal-400 border border-teal-500/25; }
+  .badge-amber { @apply badge bg-amber-500/15 text-amber-400 border border-amber-500/25; }
+  .badge-coral { @apply badge bg-coral-500/15 text-coral-400 border border-coral-500/25; }
+  .badge-jade  { @apply badge bg-jade-500/15 text-jade-400 border border-jade-500/25; }
+
+  .stat-label { @apply text-xs text-slate-500 uppercase tracking-widest font-medium; }
+  .stat-value { @apply text-2xl font-bold text-slate-100 font-mono; }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:text-slate-100 hover:bg-navy-800 transition-all duration-150 cursor-pointer;
+  }
+  .sidebar-link.active {
+    @apply text-teal-400 bg-teal-500/10 border border-teal-500/20;
+  }
+
+  .section-title {
+    @apply text-lg font-semibold text-slate-100 tracking-tight;
+  }
+
+  .data-banner {
+    @apply flex items-center gap-2 px-4 py-2.5 bg-amber-500/10 border border-amber-500/25 rounded-lg text-amber-400 text-xs font-medium;
+  }
+}
+
+@layer utilities {
+  .text-gradient-teal {
+    background: linear-gradient(135deg, #2dd4bf, #14b8a6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-amber {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glow-teal  { box-shadow: 0 0 20px rgba(45,212,191,0.25); }
+  .glow-amber { box-shadow: 0 0 20px rgba(251,191,36,0.25); }
+  .glow-coral { box-shadow: 0 0 20px rgba(244,63,94,0.25); }
+
+  .animate-fade-in   { animation: fadeIn 0.6s ease forwards; }
+  .animate-slide-up  { animation: slideUp 0.5s ease forwards; }
+
+  .grid-bg {
+    background-image: linear-gradient(rgba(45,212,191,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(45,212,191,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+}
+
+@keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse-ring {
+  0%   { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(2);   opacity: 0; }
+}
+
+.pulse-ring::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  animation: pulse-ring 1.5s ease-out infinite;
+}
+
+/* Recharts overrides */
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  @apply !bg-navy-800 !border-navy-600 !rounded-xl;
+}
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: rgba(255,255,255,0.04) !important;
+}

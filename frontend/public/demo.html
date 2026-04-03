@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARIA-Gig | Live Demo — Ravi's Story</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#040d1a; --navy2:#071428; --navy3:#0c1f3f;
+  --blue:#1e6fff; --blue-l:#3d8bff;
+  --teal:#2dd4bf; --teal-l:#5eead4;
+  --orange:#ff6b2b; --amber:#fbbf24;
+  --green:#22c55e; --green-l:#4ade80;
+  --red:#f43f5e; --red-l:#fb7185;
+  --card:rgba(255,255,255,0.04); --border:rgba(255,255,255,0.07);
+  --text:#e2e8f0; --muted:#64748b; --white:#fff;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 30%,rgba(45,212,191,0.06) 0%,transparent 50%),radial-gradient(ellipse at 80% 70%,rgba(251,191,36,0.04) 0%,transparent 50%);pointer-events:none;z-index:0;}
+
+/* SIDEBAR */
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:220px;background:var(--navy2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;padding:20px 0;}
+.s-logo{padding:0 20px 20px;border-bottom:1px solid var(--border);margin-bottom:12px;}
+.s-logo-inner{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:#fff;display:flex;align-items:center;gap:8px;}
+.s-logo-inner span{color:var(--teal);}
+.s-badge{margin-top:8px;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.25);border-radius:20px;font-size:0.68rem;color:var(--amber);font-weight:600;}
+.dot-pulse{width:5px;height:5px;border-radius:50%;background:var(--amber);animation:pulse 1.5s infinite;}
+.nav-link{display:flex;align-items:center;gap:10px;padding:11px 20px;color:var(--muted);font-size:0.83rem;cursor:pointer;transition:all 0.2s;border-left:2px solid transparent;text-decoration:none;}
+.nav-link:hover{color:#fff;background:var(--card);}
+.nav-link.active{color:var(--teal);background:rgba(45,212,191,0.08);border-left-color:var(--teal);}
+.nav-link .ni{font-size:0.95rem;width:18px;text-align:center;}
+.s-section{padding:6px 20px 4px;font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em;font-weight:700;margin-top:8px;}
+.s-bottom{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border);}
+.persona-mini{display:flex;align-items:center;gap:10px;}
+.persona-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.persona-name{font-size:0.82rem;color:#fff;font-weight:600;}
+.persona-sub{font-size:0.68rem;color:var(--muted);}
+
+/* MAIN */
+.main{margin-left:220px;padding:28px 32px;position:relative;z-index:1;}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;gap:16px;flex-wrap:wrap;}
+.topbar-left h1{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:#fff;}
+.topbar-left p{font-size:0.83rem;color:var(--muted);margin-top:3px;}
+.topbar-pills{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.pill{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:50px;font-size:0.75rem;font-weight:600;border:1px solid var(--border);background:var(--card);}
+.pill-live{border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.08);color:var(--green);}
+.pill-warn{border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.08);color:var(--amber);}
+.pill-crit{border-color:rgba(244,63,94,0.3);background:rgba(244,63,94,0.08);color:var(--red);}
+
+/* GRID */
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;}
+.grid-2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:20px;}
+.grid-2b{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(45,212,191,0.2),transparent);}
+.card-title{font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;color:#fff;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
+
+/* METRIC CARDS */
+.metric{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;}
+.metric-label{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;font-weight:600;}
+.metric-val{font-family:'Syne',sans-serif;font-size:1.65rem;font-weight:800;color:#fff;line-height:1;transition:all 0.5s;}
+.metric-sub{font-size:0.7rem;color:var(--muted);margin-top:5px;}
+.metric-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:0.64rem;font-weight:700;margin-top:6px;}
+.mb-teal{background:rgba(45,212,191,0.12);color:var(--teal);}
+.mb-amber{background:rgba(251,191,36,0.12);color:var(--amber);}
+.mb-red{background:rgba(244,63,94,0.12);color:var(--red);}
+.mb-green{background:rgba(34,197,94,0.12);color:var(--green);}
+
+/* SIMULATION CONTROLS */
+.sim-controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+.sim-btn{padding:11px 22px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.25s;display:flex;align-items:center;gap:7px;}
+.sim-btn:hover{transform:translateY(-1px);border-color:rgba(45,212,191,0.3);}
+.sim-btn.active-rain{border-color:rgba(30,111,255,0.5);background:rgba(30,111,255,0.12);color:#93c5fd;}
+.sim-btn.active-flood{border-color:rgba(244,63,94,0.5);background:rgba(244,63,94,0.12);color:var(--red-l);}
+.sim-btn.active-curfew{border-color:rgba(251,191,36,0.5);background:rgba(251,191,36,0.12);color:var(--amber);}
+.sim-btn.active-demo{border-color:rgba(45,212,191,0.5);background:rgba(45,212,191,0.12);color:var(--teal);}
+.sim-btn.active-reset{border-color:rgba(100,116,139,0.4);background:rgba(100,116,139,0.08);color:var(--muted);}
+.btn-primary{background:linear-gradient(135deg,var(--teal),#0d9488);color:#040d1a;font-weight:700;border:none;padding:12px 26px;border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.88rem;transition:all 0.2s;box-shadow:0 6px 20px rgba(45,212,191,0.2);}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(45,212,191,0.3);}
+
+/* RISK SCORE GAUGE */
+.gauge-ring{position:relative;display:inline-flex;align-items:center;justify-content:center;}
+.gauge-label{position:absolute;text-align:center;}
+.gauge-num{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:#fff;line-height:1;}
+.gauge-sub{font-size:0.65rem;color:var(--muted);margin-top:2px;}
+
+/* EARNINGS BAR CHART */
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:120px;}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.bar{width:100%;border-radius:4px 4px 0 0;transition:height 0.8s cubic-bezier(0.34,1.56,0.64,1),background 0.5s;}
+.bar-lbl{font-size:0.6rem;color:var(--muted);}
+.bar-val{font-size:0.62rem;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+
+/* CLAIM LOG */
+.claim-log{display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto;}
+.log-entry{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);animation:logIn 0.4s ease;}
+@keyframes logIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+.log-icon{font-size:1rem;flex-shrink:0;margin-top:1px;}
+.log-content .log-title{font-size:0.8rem;font-weight:600;color:#fff;}
+.log-content .log-sub{font-size:0.7rem;color:var(--muted);margin-top:1px;}
+.log-time{font-size:0.65rem;color:var(--muted);font-family:'JetBrains Mono',monospace;white-space:nowrap;margin-left:auto;flex-shrink:0;}
+.log-entry.log-success{border-color:rgba(34,197,94,0.2);background:rgba(34,197,94,0.05);}
+.log-entry.log-warn{border-color:rgba(251,191,36,0.2);background:rgba(251,191,36,0.04);}
+.log-entry.log-error{border-color:rgba(244,63,94,0.2);background:rgba(244,63,94,0.05);}
+.log-entry.log-info{border-color:rgba(45,212,191,0.2);background:rgba(45,212,191,0.04);}
+
+/* FRAUD DETECTION */
+.fraud-check{display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.02);transition:all 0.4s;}
+.fraud-check.pass{border-color:rgba(34,197,94,0.25);background:rgba(34,197,94,0.05);}
+.fraud-check.fail{border-color:rgba(244,63,94,0.35);background:rgba(244,63,94,0.08);}
+.fc-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.15);flex-shrink:0;transition:background 0.4s;}
+.fraud-check.pass .fc-dot{background:var(--green);}
+.fraud-check.fail .fc-dot{background:var(--red);}
+.fc-label{flex:1;font-size:0.78rem;color:var(--muted);transition:color 0.3s;}
+.fraud-check.pass .fc-label,.fraud-check.fail .fc-label{color:var(--text);}
+.fc-score{font-family:'JetBrains Mono',monospace;font-size:0.78rem;font-weight:600;}
+.fc-badge{padding:2px 8px;border-radius:20px;font-size:0.64rem;font-weight:700;}
+
+/* PAYOUT ANIMATION */
+.payout-flash{animation:payFlash 0.6s ease;}
+@keyframes payFlash{0%{transform:scale(1)}40%{transform:scale(1.08);color:var(--green)}100%{transform:scale(1)}}
+
+/* TIMELINE */
+.demo-timeline{display:flex;flex-direction:column;gap:0;}
+.dt-step{display:flex;gap:14px;padding-bottom:20px;position:relative;}
+.dt-step:not(:last-child)::after{content:'';position:absolute;left:14px;top:32px;bottom:0;width:2px;background:rgba(255,255,255,0.05);transition:background 0.5s;}
+.dt-step.done:not(:last-child)::after,.dt-step.active:not(:last-child)::after{background:var(--teal);}
+.dt-dot{width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,0.1);background:var(--navy2);display:flex;align-items:center;justify-content:center;font-size:0.75rem;flex-shrink:0;transition:all 0.4s;}
+.dt-step.active .dt-dot{border-color:var(--teal);background:rgba(45,212,191,0.15);box-shadow:0 0 12px rgba(45,212,191,0.3);}
+.dt-step.done .dt-dot{border-color:var(--green);background:rgba(34,197,94,0.15);}
+.dt-body{flex:1;}
+.dt-label{font-size:0.83rem;font-weight:600;color:var(--muted);transition:color 0.3s;}
+.dt-step.active .dt-label,.dt-step.done .dt-label{color:#fff;}
+.dt-desc{font-size:0.72rem;color:var(--muted);margin-top:3px;max-height:0;overflow:hidden;transition:max-height 0.5s,opacity 0.4s;opacity:0;line-height:1.6;}
+.dt-step.active .dt-desc,.dt-step.done .dt-desc{max-height:100px;opacity:1;}
+.dt-result{display:none;margin-top:8px;padding:10px 13px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:10px;font-size:0.78rem;color:var(--green);}
+.dt-step.done .dt-result{display:block;}
+
+/* EXPLAINABLE AI */
+.xai-bar-wrap{margin-bottom:10px;}
+.xai-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.xai-label{font-size:0.75rem;color:var(--muted);width:130px;flex-shrink:0;}
+.xai-track{flex:1;height:6px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;}
+.xai-fill{height:100%;border-radius:4px;transition:width 1s ease;}
+.xai-val{font-family:'JetBrains Mono',monospace;font-size:0.72rem;font-weight:600;width:38px;text-align:right;flex-shrink:0;}
+.premium-total{background:linear-gradient(135deg,rgba(45,212,191,0.1),rgba(30,111,255,0.1));border:1px solid rgba(45,212,191,0.2);border-radius:12px;padding:14px;text-align:center;margin-top:14px;}
+.pt-label{font-size:0.7rem;color:var(--muted);}
+.pt-val{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--teal);}
+
+/* PREDICTIVE */
+.pred-bar{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.pred-day{font-size:0.72rem;color:var(--muted);width:28px;flex-shrink:0;}
+.pred-track{flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,0.05);overflow:hidden;}
+.pred-fill{height:100%;border-radius:4px;transition:width 1.2s ease;}
+.pred-pct{font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--muted);width:35px;text-align:right;}
+
+/* LINE CHART (pure CSS/JS SVG) */
+.chart-svg{width:100%;overflow:visible;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--navy2);border:1px solid var(--border);border-radius:14px;padding:16px 20px;max-width:320px;box-shadow:0 20px 60px rgba(0,0,0,0.5);transform:translateX(380px);transition:transform 0.5s cubic-bezier(0.34,1.56,0.64,1);z-index:999;}
+.toast.show{transform:translateX(0);}
+.toast-icon{font-size:1.5rem;margin-bottom:5px;}
+.toast-title{font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;color:#fff;}
+.toast-msg{font-size:0.75rem;color:var(--muted);margin-top:2px;line-height:1.5;}
+
+/* RAIN FX */
+.rain-overlay{position:fixed;inset:0;pointer-events:none;z-index:500;display:none;}
+.rdrop{position:absolute;top:-30px;width:2px;background:linear-gradient(to bottom,transparent,rgba(100,180,255,0.4));border-radius:2px;animation:rfail linear infinite;}
+@keyframes rfail{to{transform:translateY(110vh);}}
+.curfew-overlay{position:fixed;inset:0;background:rgba(251,191,36,0.04);pointer-events:none;z-index:2;display:none;border:3px solid rgba(251,191,36,0.15);}
+
+/* PROGRESS RING */
+.progress-ring circle{transition:stroke-dashoffset 1s ease;transform-origin:center;transform:rotate(-90deg);}
+
+/* BADGE */
+.badge{padding:3px 8px;border-radius:20px;font-size:0.65rem;font-weight:700;}
+.badge-teal{background:rgba(45,212,191,0.12);color:var(--teal);}
+.badge-amber{background:rgba(251,191,36,0.12);color:var(--amber);}
+.badge-red{background:rgba(244,63,94,0.12);color:var(--red);}
+.badge-green{background:rgba(34,197,94,0.12);color:var(--green);}
+.badge-blue{background:rgba(30,111,255,0.15);color:#93c5fd;}
+
+/* DEMO MODE BANNER */
+.demo-banner{position:fixed;top:0;left:220px;right:0;z-index:200;display:none;}
+.demo-banner-inner{background:linear-gradient(90deg,rgba(45,212,191,0.12),rgba(30,111,255,0.08));border-bottom:1px solid rgba(45,212,191,0.2);padding:9px 24px;display:flex;align-items:center;gap:12px;}
+.demo-step-indicator{display:flex;gap:6px;}
+.dsi{width:28px;height:4px;border-radius:2px;background:rgba(255,255,255,0.1);transition:background 0.4s;}
+.dsi.done{background:var(--green);}
+.dsi.active{background:var(--teal);}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.animate-in{animation:fadeSlideIn 0.5s ease forwards;}
+
+/* SPARKLINE */
+.sparkline{display:flex;align-items:flex-end;gap:3px;height:40px;}
+.spark{flex:1;border-radius:2px 2px 0 0;min-height:3px;transition:height 0.7s ease,background 0.5s;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:4px;}
+</style>
+</head>
+<body>
+
+<!-- Effects -->
+<div class="rain-overlay" id="rainOverlay"></div>
+<div class="curfew-overlay" id="curfewOverlay"></div>
+
+<!-- Demo mode banner -->
+<div class="demo-banner" id="demoBanner">
+  <div class="demo-banner-inner">
+    <span style="font-size:0.8rem;color:var(--teal);font-weight:700;">🎮 DEMO MODE</span>
+    <div class="demo-step-indicator" id="demoSteps">
+      <div class="dsi" id="ds0"></div><div class="dsi" id="ds1"></div>
+      <div class="dsi" id="ds2"></div><div class="dsi" id="ds3"></div>
+    </div>
+    <span style="font-size:0.75rem;color:var(--muted);" id="demoHint">Step 1 of 4 — Meet Ravi, your delivery partner</span>
+    <button onclick="nextDemoStep()" style="margin-left:auto;padding:6px 16px;border-radius:8px;background:rgba(45,212,191,0.15);border:1px solid rgba(45,212,191,0.3);color:var(--teal);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;" id="demoNextBtn">Next →</button>
+    <button onclick="exitDemo()" style="padding:6px 12px;border-radius:8px;background:rgba(100,116,139,0.1);border:1px solid rgba(100,116,139,0.2);color:var(--muted);font-size:0.72rem;cursor:pointer;font-family:'DM Sans',sans-serif;">Exit</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <div class="toast-icon" id="ti">⚡</div>
+  <div class="toast-title" id="tt">Alert</div>
+  <div class="toast-msg" id="tm"></div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="s-logo">
+    <div class="s-logo-inner">🛡️ ARIA<span>-Gig</span></div>
+    <div class="s-badge"><div class="dot-pulse"></div>Live Demo Mode</div>
+  </div>
+
+  <div class="s-section">Simulation</div>
+  <a class="nav-link active" href="demo.html"><span class="ni">🎬</span> Demo Engine</a>
+  <a class="nav-link" href="simulation.html"><span class="ni">⚡</span> Payout Sim</a>
+
+  <div class="s-section">Dashboards</div>
+  <a class="nav-link" href="dashboard.html"><span class="ni">🛵</span> Worker View</a>
+  <a class="nav-link" href="/"><span class="ni">📊</span> ARIA Analytics</a>
+  <a class="nav-link" href="/admin"><span class="ni">🔧</span> Admin Panel</a>
+
+  <div class="s-section">Features</div>
+  <a class="nav-link" href="income-shock.html"><span class="ni">📉</span> Income Shock</a>
+  <a class="nav-link" href="fraud.html"><span class="ni">🔍</span> Fraud Detection</a>
+  <a class="nav-link" href="history.html"><span class="ni">📋</span> History & ROI</a>
+  <a class="nav-link" href="home.html"><span class="ni">🏠</span> Home</a>
+
+  <div class="s-bottom">
+    <div class="persona-mini">
+      <div class="persona-av">🏍️</div>
+      <div>
+        <div class="persona-name">Ravi Kumar</div>
+        <div class="persona-sub">Bengaluru · Swiggy</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="mainContent">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>🎬 Cinematic Demo Engine</h1>
+      <p>Real-time parametric insurance for Ravi Kumar — Delivery Partner, Bengaluru</p>
+      <div style="margin-top:10px;display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:linear-gradient(135deg,rgba(45,212,191,0.1),rgba(30,111,255,0.08));border:1px solid rgba(45,212,191,0.25);border-radius:50px;">
+        <span style="font-size:0.9rem;">⚡</span>
+        <span style="font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:700;color:var(--teal);letter-spacing:0.02em;">This is not insurance. This is a real-time income protection engine.</span>
+      </div>
+    </div>
+    <div class="topbar-pills">
+      <div class="pill pill-live"><div style="width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;"></div>ARIA Engine Online</div>
+      <div class="pill" id="scenarioPill" style="display:none;"></div>
+      <button onclick="launchDemoMode()" class="btn-primary" style="padding:9px 20px;font-size:0.8rem;">🎮 Launch Demo Mode</button>
+    </div>
+  </div>
+
+  <!-- SIMULATION CONTROLS -->
+  <div style="background:rgba(45,212,191,0.04);border:1px solid rgba(45,212,191,0.12);border-radius:14px;padding:18px;margin-bottom:22px;">
+    <div style="font-size:0.72rem;color:var(--teal);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;">⚡ Simulation Controls — Click to trigger a real-time event</div>
+    <div class="sim-controls">
+      <button class="sim-btn" onclick="triggerScenario('rain')" id="btn-rain">🌧️ Heavy Rain</button>
+      <button class="sim-btn" onclick="triggerScenario('flood')" id="btn-flood">🌊 Flash Flood</button>
+      <button class="sim-btn" onclick="triggerScenario('curfew')" id="btn-curfew">🚫 Curfew / Protest</button>
+      <button class="sim-btn" onclick="triggerScenario('heatwave')" id="btn-heatwave">🌡️ Heat Wave</button>
+      <button class="sim-btn" onclick="triggerScenario('fuel')" id="btn-fuel">⛽ Fuel Price Spike</button>
+      <button class="sim-btn" id="btn-reset" onclick="resetAll()" style="margin-left:auto;">↺ Reset</button>
+    </div>
+  </div>
+
+  <!-- EMOTIONAL IMPACT BANNER -->
+  <div id="emotionalBanner" style="display:none;margin-bottom:20px;animation:fadeSlideIn 0.6s ease forwards;">
+    <div style="background:linear-gradient(135deg,rgba(244,63,94,0.12),rgba(251,191,36,0.08));border:1px solid rgba(244,63,94,0.3);border-radius:14px;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:1.6rem;">💔</span>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:#fff;" id="emotionalText">Ravi lost <span style="color:var(--red);">₹820</span> today. We protected <span style="color:var(--green);">₹247</span> instantly.</div>
+          <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;">Automatic detection · Zero claim filed · Funds transferred in 4.2s</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);border-radius:50px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 1.5s infinite;"></span>
+        <span style="font-size:0.75rem;font-weight:700;color:var(--green);">PROTECTED</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE METRICS -->
+  <div class="grid-4" id="metricsRow">
+    <div class="metric" id="m-workability">
+      <div class="metric-label">Workability Score</div>
+      <div class="metric-val" id="mv-workability" style="color:var(--green);">82</div>
+      <div class="metric-sub">Real-time composite</div>
+      <div class="metric-badge mb-teal" id="mb-workability">SAFE</div>
+    </div>
+    <div class="metric" id="m-edi">
+      <div class="metric-label">EDI · Earnings Deficit</div>
+      <div class="metric-val" id="mv-edi" style="color:var(--amber);">₹0</div>
+      <div class="metric-sub">Expected − Actual</div>
+      <div class="metric-badge mb-teal" id="mb-edi">No loss detected</div>
+    </div>
+    <div class="metric" id="m-causation">
+      <div class="metric-label">Causation Score</div>
+      <div class="metric-val" id="mv-causation" style="color:var(--blue-l);">12%</div>
+      <div class="metric-sub">Systemic attribution</div>
+      <div class="metric-badge mb-teal" id="mb-causation">Individual</div>
+    </div>
+    <div class="metric" id="m-payout">
+      <div class="metric-label">Auto-Payout</div>
+      <div class="metric-val" id="mv-payout" style="color:var(--muted);">—</div>
+      <div class="metric-sub">Zero-click disbursed</div>
+      <div class="metric-badge mb-teal" id="mb-payout">Standby</div>
+    </div>
+  </div>
+
+  <!-- ROW 2: Earnings chart + Claim log -->
+  <div class="grid-2">
+    <!-- Income Shock Visualization -->
+    <div class="card">
+      <div class="card-title">
+        📉 Income Shock — Expected vs Actual
+        <span class="badge badge-blue" id="earningsBadge">Normal</span>
+      </div>
+      <!-- Legend -->
+      <div style="display:flex;gap:16px;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,3"/></svg>
+          <span style="font-size:0.65rem;color:#94a3b8;">Expected</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="width:22px;height:3px;background:#2dd4bf;border-radius:2px;"></div>
+          <span style="font-size:0.65rem;color:#94a3b8;">Actual</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="width:14px;height:12px;background:rgba(244,63,94,0.35);border-radius:2px;"></div>
+          <span style="font-size:0.65rem;color:#fb7185;font-weight:700;">Income Gap</span>
+        </div>
+      </div>
+      <!-- Canvas chart -->
+      <canvas id="incomeShockCanvas" height="130" style="width:100%;display:block;border-radius:8px;"></canvas>
+      <!-- Stats row -->
+      <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:12px;">
+        <div>
+          <div style="font-size:0.65rem;color:#64748b;">Expected Today</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#fff;font-size:1rem;" id="expectedAmt">₹850</div>
+        </div>
+        <div>
+          <div style="font-size:0.65rem;color:#64748b;">Actual (Live)</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#22c55e;font-size:1rem;transition:all 0.5s;" id="actualAmt">₹820</div>
+        </div>
+        <div>
+          <div style="font-size:0.65rem;color:#64748b;">Income Gap</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#f43f5e;font-size:1rem;transition:all 0.5s;" id="lossAmt">₹30</div>
+        </div>
+        <div>
+          <div style="font-size:0.65rem;color:#64748b;">Deliveries</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#2dd4bf;font-size:1rem;transition:all 0.5s;" id="deliveriesAmt">18</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Claim Log -->
+    <div class="card">
+      <div class="card-title">
+        ⚡ Zero-Touch Claim Log
+        <span class="badge badge-teal" id="claimCount">0 events</span>
+      </div>
+      <div class="claim-log" id="claimLog">
+        <div style="text-align:center;padding:30px 0;color:var(--muted);font-size:0.8rem;">
+          <div style="font-size:1.5rem;margin-bottom:8px;">💤</div>
+          No disruptions detected. Ravi is earning normally.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 3: Workability gauge + XAI Premium + Fraud -->
+  <div class="grid-3">
+
+    <!-- Workability + Conditions -->
+    <div class="card">
+      <div class="card-title">🧠 Workability Index</div>
+      <div style="display:flex;align-items:center;gap:20px;">
+        <div style="flex-shrink:0;">
+          <svg width="110" height="110" viewBox="0 0 110 110">
+            <circle cx="55" cy="55" r="44" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
+            <circle id="workabilityRing" cx="55" cy="55" r="44" fill="none" stroke="url(#wGrad)" stroke-width="10" stroke-linecap="round" stroke-dasharray="276" stroke-dashoffset="55" class="progress-ring">
+              <defs><linearGradient id="wGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f43f5e"/><stop offset="50%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#22c55e"/></linearGradient></defs>
+            </circle>
+            <text x="55" y="51" text-anchor="middle" fill="white" font-size="22" font-weight="800" font-family="Syne" id="wScore">82</text>
+            <text x="55" y="65" text-anchor="middle" fill="#64748b" font-size="9" font-family="DM Sans" id="wLabel">SAFE</text>
+          </svg>
+        </div>
+        <div style="flex:1;">
+          <div id="conditionsList" style="display:flex;flex-direction:column;gap:7px;"></div>
+        </div>
+      </div>
+      <!-- Sparklines for 5 signals -->
+      <div style="margin-top:14px;display:flex;flex-direction:column;gap:6px;" id="signalBars"></div>
+    </div>
+
+    <!-- Explainable AI Premium -->
+    <div class="card">
+      <div class="card-title">🧠 Explainable AI Pricing
+        <span class="badge badge-teal">XAI</span>
+      </div>
+      <div id="xaiBreakdown" style="display:flex;flex-direction:column;gap:0;"></div>
+      <div class="premium-total">
+        <div class="pt-label">Weekly Premium</div>
+        <div class="pt-val" id="premiumTotal">₹50</div>
+        <div style="font-size:0.68rem;color:var(--muted);margin-top:4px;" id="premiumTier">Medium Risk Tier</div>
+      </div>
+    </div>
+
+    <!-- Predictive Forecast -->
+    <div class="card">
+      <div class="card-title">🔮 Next 7-Day Risk Forecast</div>
+      <div id="forecastBars" style="display:flex;flex-direction:column;gap:6px;"></div>
+      <div style="margin-top:14px;padding:12px;background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.12);border-radius:10px;">
+        <div style="font-size:0.68rem;color:var(--amber);font-weight:600;margin-bottom:4px;">📡 ARIA Forecast</div>
+        <div style="font-size:0.75rem;color:var(--muted);line-height:1.6;" id="forecastText">Moderate risk week ahead. Suggested coverage: ₹50/week. Expected payout exposure: ₹120.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 4: Demo Timeline + Admin panel -->
+  <div class="grid-2b">
+
+    <!-- Step-by-step demo timeline -->
+    <div class="card">
+      <div class="card-title">🎮 Interactive Demo Walkthrough
+        <button onclick="runFullDemo()" class="btn-primary" style="padding:7px 16px;font-size:0.75rem;">▶ Run Full Demo</button>
+      </div>
+      <div class="demo-timeline" id="demoTimeline"></div>
+      <div id="demoCompleteMsg" style="display:none;margin-top:14px;padding:16px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:12px;text-align:center;">
+        <div style="font-size:1.5rem;">🛡️</div>
+        <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:#fff;margin-top:6px;line-height:1.4;">"Ravi didn't file a claim.<br>The system protected him automatically."</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:6px;">₹<span id="finalPayout">0</span> credited in 4.2s · Zero paperwork · Zero friction</div>
+        <div style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(45,212,191,0.1);border:1px solid rgba(45,212,191,0.25);border-radius:50px;">
+          <span style="width:6px;height:6px;border-radius:50%;background:var(--teal);display:inline-block;animation:pulse 1.5s infinite;"></span>
+          <span style="font-size:0.7rem;font-weight:700;color:var(--teal);font-family:'Syne',sans-serif;">ARIA ENGINE · ALWAYS ON</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin overview -->
+    <div class="card">
+      <div class="card-title">🔧 Admin Overview — Live Pool</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+        <div style="background:rgba(255,255,255,0.03);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.05);">
+          <div style="font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;">Active Policies</div>
+          <div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:#fff;margin-top:4px;" id="adminPolicies">14,820</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.05);">
+          <div style="font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;">Pool Balance</div>
+          <div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--teal);margin-top:4px;" id="adminPool">₹32.4L</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.05);">
+          <div style="font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;">Loss Ratio</div>
+          <div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--amber);margin-top:4px;" id="adminLossRatio">22.5%</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.05);">
+          <div style="font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;">Fraud Blocked</div>
+          <div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--red-l);margin-top:4px;" id="adminFraud">₹2.1L</div>
+        </div>
+      </div>
+
+      <!-- Region heatmap bars -->
+      <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;font-weight:600;">Region-wise Disruption Index</div>
+      <div id="regionHeatmap" style="display:flex;flex-direction:column;gap:6px;"></div>
+      <div style="margin-top:14px;">
+        <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;font-weight:600;">Today's Payout Triggers</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;" id="triggerPills"></div>
+      </div>
+    </div>
+  </div>
+</div><!-- /main -->
+
+<script>
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+const STATE = {
+  scenario: null,
+  workability: 82,
+  edi: 0,
+  causation: 0.12,
+  payout: 0,
+  expected: 850,
+  actual: 820,
+  deliveries: 18,
+  premiumBase: 20,
+  premiumWeather: 12,
+  premiumLocation: 10,
+  premiumDiscount: -8,
+  claimCount: 0,
+  fraudBlocked: 210000,
+  demoStep: -1,
+  demoRunning: false,
+};
+
+const SCENARIOS = {
+  rain: {
+    label:'Heavy Rain', icon:'🌧️', cls:'active-rain',
+    workability:32, edi:380, causation:0.71, payout:247, actual:470, deliveries:8,
+    conditions:{temp:'24°C',rain:'42mm',wind:'38km/h',aqi:'88',flood:'Moderate',fuel:'₹102'},
+    premiumWeather:28, premiumLocation:12, premiumDiscount:-5,
+    forecast:'High risk next 3 days. Heavy monsoon pattern. Expected payout exposure: ₹280.',
+    log:[
+      {type:'warn',icon:'🌧️',title:'Heavy Rainfall Detected — 42mm/hr',sub:'IMD threshold exceeded in Bengaluru North zone'},
+      {type:'info',icon:'🧠',title:'ARIA: Workability Score → 32/100',sub:'Below trigger threshold of 50. Systemic conditions confirmed.'},
+      {type:'info',icon:'📉',title:'Deliveries dropped from 18 → 8',sub:'68% order cancellation rate in affected zone. Peer confirmation: 78% riders offline.'},
+      {type:'info',icon:'🔍',title:'Causation Score: 71%',sub:'0.40×Env + 0.30×Peers + 0.30×Demand − 0.25×Dev = 0.71'},
+      {type:'info',icon:'🔐',title:'Fraud checks: 3/3 passed',sub:'GPS verified · Platform active · Normal work pattern confirmed'},
+      {type:'success',icon:'⚡',title:'PAYOUT TRIGGERED — Tier 2 · ₹247',sub:'65% of EDI ₹380 = ₹247 credited to Ravi\'s UPI instantly'},
+    ]
+  },
+  flood: {
+    label:'Flash Flood', icon:'🌊', cls:'active-flood',
+    workability:18, edi:620, causation:0.88, payout:527, actual:230, deliveries:3,
+    conditions:{temp:'26°C',rain:'68mm',wind:'72km/h',aqi:'145',flood:'CRITICAL',fuel:'₹108'},
+    premiumWeather:38, premiumLocation:18, premiumDiscount:-3,
+    forecast:'Critical flood risk 2 days. Avoid riding. Payout exposure: ₹500+.',
+    log:[
+      {type:'error',icon:'🌊',title:'FLOOD ALERT — Critical Level Detected',sub:'River overflow reported. BBMP evacuation zones activated.'},
+      {type:'error',icon:'🚨',title:'Workability Score CRITICAL → 18/100',sub:'Lowest score tier. All riders in affected zones auto-paused.'},
+      {type:'info',icon:'📊',title:'EDI Calculated: ₹620',sub:'Expected ₹850 − Actual ₹230 = Deficit ₹620'},
+      {type:'info',icon:'🔍',title:'Causation Score: 88% — Highly Systemic',sub:'Environmental factor dominant. Individual deviation: minimal.'},
+      {type:'success',icon:'💸',title:'TIER 4 PAYOUT — ₹527 Auto-Credited',sub:'85% of EDI. Zero claims filed. WhatsApp confirmation sent.'},
+    ]
+  },
+  curfew: {
+    label:'Curfew/Protest', icon:'🚫', cls:'active-curfew',
+    workability:28, edi:490, causation:0.64, payout:318, actual:360, deliveries:5,
+    conditions:{temp:'31°C',rain:'0mm',wind:'12km/h',aqi:'188',flood:'Low',fuel:'₹105'},
+    premiumWeather:14, premiumLocation:22, premiumDiscount:-6,
+    forecast:'Civil disruption risk. AQI elevated. Demand suppressed. Coverage active.',
+    log:[
+      {type:'warn',icon:'🚫',title:'Civic Disruption Detected — Section 144',sub:'Police notification + social media signals confirmed. Demand index: 0.38.'},
+      {type:'info',icon:'😷',title:'AQI Spike: 188 (Unhealthy)',sub:'PM2.5: 65 µg/m³. Risk of respiratory stress during riding.'},
+      {type:'info',icon:'📉',title:'Order Demand Collapsed: 38%',sub:'Platform demand index below 0.5 threshold. Peer trends: 72% offline.'},
+      {type:'info',icon:'🧠',title:'Causation Confirmed: 64%',sub:'Demand drop (0.30) + Geo-political stress (0.40×0.64) = Systemic.'},
+      {type:'success',icon:'⚡',title:'Tier 3 Payout — ₹318 Disbursed',sub:'75% of EDI ₹490. Curfew classified as indirect economic disruption.'},
+    ]
+  },
+  heatwave: {
+    label:'Heat Wave', icon:'🌡️', cls:'active-heatwave',
+    workability:41, edi:280, causation:0.52, payout:182, actual:570, deliveries:11,
+    conditions:{temp:'45°C',rain:'0mm',wind:'8km/h',aqi:'142',flood:'Low',fuel:'₹103'},
+    premiumWeather:22, premiumLocation:11, premiumDiscount:-7,
+    forecast:'Heat advisory day 3–5. AQI moderate. Payout exposure: ₹160.',
+    log:[
+      {type:'warn',icon:'🌡️',title:'Heat Wave Alert — 45°C (IMD)',sub:'Extreme heat advisory issued. Rider health risk elevated.'},
+      {type:'info',icon:'📊',title:'Workability Score: 41 (Below Threshold)',sub:'Heat factor: 15pts deduction. AQI 142: -12pts. Combined impact severe.'},
+      {type:'info',icon:'📉',title:'Deliveries Reduced: 18 → 11',sub:'Voluntary slowdowns + platform order drop due to consumer heat advisory.'},
+      {type:'success',icon:'💸',title:'Tier 1 Payout — ₹182 Credited',sub:'Heat wave classified systemic. 65% of EDI ₹280 disbursed.'},
+    ]
+  },
+  fuel: {
+    label:'Fuel Price Spike', icon:'⛽', cls:'active-fuel',
+    workability:55, edi:195, causation:0.43, payout:127, actual:655, deliveries:15,
+    conditions:{temp:'30°C',rain:'2mm',wind:'16km/h',aqi:'96',flood:'Low',fuel:'₹121'},
+    premiumWeather:9, premiumLocation:10, premiumDiscount:-6,
+    forecast:'Fuel prices elevated. Iran–Israel conflict impact. Monitor demand.',
+    log:[
+      {type:'warn',icon:'⛽',title:'Fuel Price Spike: ₹102 → ₹121/L (+18.5%)',sub:'Global crude price surge. Iran–Israel conflict escalation confirmed.'},
+      {type:'info',icon:'🌍',title:'Geopolitical Stress Index: 78%',sub:'OPEC supply cut signals. 3-day trailing average elevated.'},
+      {type:'info',icon:'📉',title:'Net Earnings Impacted: −₹195 EDI',sub:'Higher operating cost (₹35 extra fuel/day) + slight demand drop.'},
+      {type:'info',icon:'🧠',title:'Causation: 43% — Indirect Economic',sub:'Fuel spike classified as indirect economic disruption under policy.'},
+      {type:'success',icon:'💰',title:'Tier 1 Payout — ₹127 Auto-Credited',sub:'50% of EDI. Fuel spike coverage active. Exclusions: Direct war damage — Not applicable.'},
+    ]
+  },
+};
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  requestAnimationFrame(() => {
+    renderEarningsChart();
+  });
+  renderConditions({temp:'31°C',rain:'2mm',wind:'14km/h',aqi:'88',flood:'Low',fuel:'₹102'});
+  renderXAI();
+  renderForecast();
+  renderDemoTimeline();
+  renderRegionHeatmap();
+  renderTriggerPills();
+});
+
+window.addEventListener('resize', () => {
+  renderEarningsChart(STATE.scenario ? SCENARIOS[STATE.scenario] : null);
+});
+
+// ═══════════════════════════════════════════════════
+// SCENARIO TRIGGER
+// ═══════════════════════════════════════════════════
+async function triggerScenario(type) {
+  if (STATE.demoRunning) return;
+  const sc = SCENARIOS[type];
+  if (!sc) return;
+  STATE.scenario = type;
+
+  // Visual
+  document.querySelectorAll('.sim-btn').forEach(b => {
+    b.className = 'sim-btn';
+    if (b.id === 'btn-'+type) b.classList.add(sc.cls);
+  });
+  document.getElementById('scenarioPill').style.display = 'flex';
+  document.getElementById('scenarioPill').innerHTML = sc.icon + ' ' + sc.label + ' ACTIVE';
+  document.getElementById('scenarioPill').className = 'pill pill-crit';
+
+  // Effects
+  if (type === 'rain' || type === 'flood') startRain(type === 'flood' ? 80 : 45);
+  else stopRain();
+  document.getElementById('curfewOverlay').style.display = type === 'curfew' ? 'block' : 'none';
+
+  // Clear log
+  document.getElementById('claimLog').innerHTML = '';
+  STATE.claimCount = 0;
+
+  // Animate metrics
+  await animateMetrics(sc);
+
+  // Replay log
+  for (const entry of sc.log) {
+    await delay(700);
+    addLog(entry.icon, entry.title, entry.sub, entry.type);
+    STATE.claimCount++;
+    document.getElementById('claimCount').textContent = STATE.claimCount + ' events';
+  }
+
+  // Update XAI
+  STATE.premiumWeather = sc.premiumWeather;
+  STATE.premiumLocation = sc.premiumLocation;
+  STATE.premiumDiscount = sc.premiumDiscount;
+  renderXAI(sc);
+
+  // Update conditions
+  renderConditions(sc.conditions);
+
+  // Forecast
+  document.getElementById('forecastText').textContent = sc.forecast;
+  renderForecast(type);
+
+  // Toast
+  if (sc.payout > 0) {
+    showToast('💸', '₹'+sc.payout+' Auto-Credited to Ravi!', 'Tier payout processed. Zero claims filed. WhatsApp sent.');
+  }
+
+  // Update admin
+  updateAdminOnScenario(sc);
+}
+
+async function animateMetrics(sc) {
+  const steps = 20;
+  const delay_ms = 50;
+  const wStep = (sc.workability - STATE.workability) / steps;
+  const ediStep = (sc.edi - STATE.edi) / steps;
+  const causStep = (sc.causation - STATE.causation) / steps;
+
+  for (let i = 0; i < steps; i++) {
+    STATE.workability += wStep;
+    STATE.edi += ediStep;
+    STATE.causation += causStep;
+    STATE.actual = sc.actual + (850 - sc.actual) * (1 - i / steps);
+    STATE.deliveries = Math.round(18 - (18 - sc.deliveries) * (i / steps));
+    updateMetricDisplay();
+    await delay(delay_ms);
+  }
+
+  // Final values
+  STATE.workability = sc.workability;
+  STATE.edi = sc.edi;
+  STATE.causation = sc.causation;
+  STATE.actual = sc.actual;
+  STATE.payout = sc.payout;
+  STATE.deliveries = sc.deliveries;
+  updateMetricDisplay(true);
+  renderEarningsChart(sc);
+}
+
+function updateMetricDisplay(final = false) {
+  const w = Math.round(STATE.workability);
+  const e = Math.round(STATE.edi);
+  const c = Math.round(STATE.causation * 100);
+
+  document.getElementById('mv-workability').textContent = w;
+  document.getElementById('mv-workability').style.color = w < 50 ? 'var(--red)' : w < 65 ? 'var(--amber)' : 'var(--green)';
+  document.getElementById('mb-workability').textContent = w < 50 ? '⚠ PAYOUT ZONE' : w < 65 ? 'CAUTION' : 'SAFE';
+  document.getElementById('mb-workability').className = 'metric-badge ' + (w < 50 ? 'mb-red' : w < 65 ? 'mb-amber' : 'mb-teal');
+
+  document.getElementById('mv-edi').textContent = e > 0 ? '₹'+e : '₹0';
+  document.getElementById('mv-edi').style.color = e > 300 ? 'var(--red)' : e > 100 ? 'var(--amber)' : 'var(--teal)';
+  document.getElementById('mb-edi').textContent = e > 300 ? 'Critical loss' : e > 100 ? 'Moderate loss' : 'Minimal';
+  document.getElementById('mb-edi').className = 'metric-badge ' + (e > 300 ? 'mb-red' : e > 100 ? 'mb-amber' : 'mb-teal');
+
+  document.getElementById('mv-causation').textContent = c + '%';
+  document.getElementById('mv-causation').style.color = c >= 40 ? 'var(--red)' : 'var(--blue-l)';
+  document.getElementById('mb-causation').textContent = c >= 40 ? '✓ Systemic' : 'Individual';
+  document.getElementById('mb-causation').className = 'metric-badge ' + (c >= 40 ? 'mb-red' : 'mb-teal');
+
+  document.getElementById('mv-payout').textContent = STATE.payout > 0 && final ? '₹'+STATE.payout : (STATE.payout > 0 ? '...' : '—');
+  document.getElementById('mv-payout').style.color = STATE.payout > 0 ? 'var(--green)' : 'var(--muted)';
+  document.getElementById('mb-payout').textContent = STATE.payout > 0 && final ? 'Credited ✓' : 'Standby';
+  document.getElementById('mb-payout').className = 'metric-badge ' + (STATE.payout > 0 && final ? 'mb-green' : 'mb-teal');
+
+  document.getElementById('actualAmt').textContent = '₹' + Math.round(STATE.actual);
+  document.getElementById('lossAmt').textContent = '₹' + Math.round(STATE.edi);
+  document.getElementById('deliveriesAmt').textContent = STATE.deliveries;
+
+  // Workability ring
+  const offset = 276 - (w / 100) * 276;
+  document.getElementById('workabilityRing').style.strokeDashoffset = offset;
+  document.getElementById('wScore').textContent = w;
+  document.getElementById('wLabel').textContent = w < 50 ? 'AT RISK' : w < 65 ? 'CAUTION' : 'SAFE';
+  document.getElementById('wLabel').style.fill = w < 50 ? '#f43f5e' : w < 65 ? '#fbbf24' : '#22c55e';
+}
+
+// ═══════════════════════════════════════════════════
+// INCOME SHOCK VISUALIZER — canvas-based
+// ═══════════════════════════════════════════════════
+function renderEarningsChart(sc = null) {
+  const canvas = document.getElementById('incomeShockCanvas');
+  if (!canvas) return;
+
+  const DPR = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  const cssW = rect.width || 460;
+  const cssH = 130;
+  canvas.width  = cssW * DPR;
+  canvas.height = cssH * DPR;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(DPR, DPR);
+
+  const days         = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const expectedData = [850, 850, 850, 850, 850, 850, 850];
+  const baseActual   = [820, 890, 780, 850, 910, 760, 820];
+  const actualData   = sc
+    ? [820, 890, 780, 850, sc.actual, Math.round(sc.actual * 0.82), Math.round(sc.actual * 0.74)]
+    : baseActual;
+
+  const n = days.length;
+  const padL = 8, padR = 8, padT = 12, padB = 22;
+  const chartW = cssW - padL - padR;
+  const chartH = cssH - padT - padB;
+
+  const allVals = [...expectedData, ...actualData];
+  const minV = Math.min(...allVals) * 0.87;
+  const maxV = Math.max(...allVals) * 1.06;
+
+  const px = i => padL + (i / (n - 1)) * chartW;
+  const py = v => padT + chartH - ((v - minV) / (maxV - minV)) * chartH;
+
+  // 1. Grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let t = 0; t <= 4; t++) {
+    const y = padT + (t / 4) * chartH;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + chartW, y); ctx.stroke();
+  }
+
+  // 2. Gap fill between lines
+  if (sc) {
+    ctx.beginPath();
+    ctx.moveTo(px(0), py(expectedData[0]));
+    for (let i = 1; i < n; i++) ctx.lineTo(px(i), py(expectedData[i]));
+    for (let i = n - 1; i >= 0; i--) ctx.lineTo(px(i), py(actualData[i]));
+    ctx.closePath();
+    const grd = ctx.createLinearGradient(0, padT, 0, padT + chartH);
+    grd.addColorStop(0, 'rgba(244,63,94,0.40)');
+    grd.addColorStop(1, 'rgba(244,63,94,0.02)');
+    ctx.fillStyle = grd;
+    ctx.fill();
+  }
+
+  // 3. Expected line — dashed slate
+  ctx.save();
+  ctx.setLineDash([6, 4]);
+  ctx.strokeStyle = 'rgba(148,163,184,0.65)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(px(0), py(expectedData[0]));
+  for (let i = 1; i < n; i++) ctx.lineTo(px(i), py(expectedData[i]));
+  ctx.stroke();
+  ctx.restore();
+
+  // 4. Actual line — teal
+  ctx.strokeStyle = '#2dd4bf';
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.lineCap  = 'round';
+  ctx.beginPath();
+  ctx.moveTo(px(0), py(actualData[0]));
+  for (let i = 1; i < n; i++) ctx.lineTo(px(i), py(actualData[i]));
+  ctx.stroke();
+
+  // 5. Dots
+  const todayIdx = 4;
+  for (let i = 0; i < n; i++) {
+    const x = px(i), y = py(actualData[i]);
+    const gap = expectedData[i] - actualData[i];
+    const isToday = i === todayIdx;
+    const dotCol = isToday && sc && gap > 50
+      ? (gap > 300 ? '#f43f5e' : '#fbbf24') : '#2dd4bf';
+
+    if (isToday && sc) {
+      ctx.beginPath();
+      ctx.arc(x, y, 10, 0, Math.PI * 2);
+      ctx.strokeStyle = dotCol === '#f43f5e' ? 'rgba(244,63,94,0.3)' : 'rgba(251,191,36,0.3)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+    ctx.beginPath();
+    ctx.arc(x, y, isToday && sc ? 5 : 3, 0, Math.PI * 2);
+    ctx.fillStyle = dotCol;
+    ctx.fill();
+  }
+
+  // 6. Gap annotation
+  if (sc) {
+    const gap = Math.round(expectedData[todayIdx] - actualData[todayIdx]);
+    if (gap > 20) {
+      const lx = px(todayIdx) + 12;
+      const ly = (py(expectedData[todayIdx]) + py(actualData[todayIdx])) / 2 + 4;
+      // Bracket line
+      ctx.save();
+      ctx.setLineDash([3, 2]);
+      ctx.strokeStyle = 'rgba(251,113,133,0.5)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(px(todayIdx) + 4, py(expectedData[todayIdx]));
+      ctx.lineTo(px(todayIdx) + 4, py(actualData[todayIdx]));
+      ctx.stroke();
+      ctx.restore();
+      // Label
+      ctx.fillStyle = '#fb7185';
+      ctx.font = 'bold 10px "JetBrains Mono", monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText('\u2212\u20b9' + gap, lx, ly);
+    }
+  }
+
+  // 7. Day labels
+  ctx.textAlign = 'center';
+  for (let i = 0; i < n; i++) {
+    const isToday = i === todayIdx;
+    ctx.fillStyle = isToday ? '#ffffff' : '#475569';
+    ctx.font = isToday ? 'bold 9px "DM Sans",sans-serif' : '8px "DM Sans",sans-serif';
+    ctx.fillText(days[i] + (isToday ? ' \u25c4' : ''), px(i), cssH - 5);
+  }
+
+  // 8. Badge
+  const badge = document.getElementById('earningsBadge');
+  if (sc) {
+    const g = expectedData[todayIdx] - actualData[todayIdx];
+    badge.textContent = g > 300 ? '\u26a0 Severe Gap' : g > 100 ? '\u26a0 Income Gap' : 'Minor Gap';
+    badge.className   = 'badge ' + (g > 300 ? 'badge-red' : 'badge-amber');
+  } else {
+    badge.textContent = 'Normal';
+    badge.className   = 'badge badge-blue';
+  }
+
+  // 9. Emotional banner
+  if (sc && sc.payout > 0) {
+    const loss = Math.max(0, Math.round(850 - sc.actual));
+    document.getElementById('emotionalText').innerHTML =
+      `Ravi lost <span style="color:#f43f5e;">\u20b9${loss}</span> today. We protected <span style="color:#22c55e;">\u20b9${sc.payout}</span> instantly.`;
+    document.getElementById('emotionalBanner').style.display = 'block';
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// CONDITIONS
+// ═══════════════════════════════════════════════════
+function renderConditions(c) {
+  const items = [
+    { icon:'🌧️', label:'Rainfall', val:c.rain, color: parseInt(c.rain)>20 ? 'var(--red)' : parseInt(c.rain)>8 ? 'var(--amber)' : 'var(--green)' },
+    { icon:'🌡️', label:'Temp', val:c.temp, color: parseInt(c.temp)>40 ? 'var(--red)' : parseInt(c.temp)>35 ? 'var(--amber)' : 'var(--green)' },
+    { icon:'💨', label:'Wind', val:c.wind, color: parseInt(c.wind)>50 ? 'var(--red)' : parseInt(c.wind)>30 ? 'var(--amber)' : 'var(--green)' },
+    { icon:'😷', label:'AQI', val:c.aqi, color: parseInt(c.aqi)>200 ? 'var(--red)' : parseInt(c.aqi)>100 ? 'var(--amber)' : 'var(--green)' },
+    { icon:'⛽', label:'Fuel', val:c.fuel, color: parseInt(c.fuel.replace('₹',''))>110 ? 'var(--red)' : 'var(--green)' },
+  ];
+  document.getElementById('conditionsList').innerHTML = items.map(i =>
+    `<div style="display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:7px;background:rgba(255,255,255,0.02);">
+      <span style="font-size:0.9rem;">${i.icon}</span>
+      <span style="font-size:0.7rem;color:var(--muted);flex:1;">${i.label}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;font-weight:600;color:${i.color};">${i.val}</span>
+    </div>`
+  ).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// XAI PREMIUM BREAKDOWN
+// ═══════════════════════════════════════════════════
+function renderXAI(sc = null) {
+  const w = sc ? sc.premiumWeather : 12;
+  const l = sc ? sc.premiumLocation : 10;
+  const d = sc ? sc.premiumDiscount : -8;
+  const total = 20 + w + l + Math.abs(d);
+  const finalPremium = Math.max(30, Math.min(70, total));
+
+  const rows = [
+    { label:'Base Premium', val:20, max:20, color:'#64748b', prefix:'+' },
+    { label:'Weather Risk', val:w, max:40, color:'#3d8bff', prefix:'+' },
+    { label:'Location Risk', val:l, max:25, color:'#f59e0b', prefix:'+' },
+    { label:'Behavioral Discount', val:Math.abs(d), max:15, color:'#22c55e', prefix:'-' },
+  ];
+
+  document.getElementById('xaiBreakdown').innerHTML = rows.map(r => `
+    <div class="xai-row">
+      <div class="xai-label" style="font-size:0.72rem;color:var(--muted);">${r.label}</div>
+      <div class="xai-track">
+        <div class="xai-fill" style="width:${Math.round(r.val/r.max*100)}%;background:${r.color};"></div>
+      </div>
+      <div class="xai-val" style="color:${r.color};">${r.prefix}₹${r.val}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('premiumTotal').textContent = '₹' + finalPremium;
+  document.getElementById('premiumTier').textContent = finalPremium <= 30 ? 'Low Risk Tier' : finalPremium <= 50 ? 'Medium Risk Tier' : 'High Risk Tier';
+  document.getElementById('premiumTotal').style.color = finalPremium > 50 ? 'var(--red)' : finalPremium > 35 ? 'var(--amber)' : 'var(--teal)';
+}
+
+// ═══════════════════════════════════════════════════
+// FORECAST
+// ═══════════════════════════════════════════════════
+function renderForecast(type = null) {
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const base = [18,22,35,28,45,32,20];
+  const stressed = {
+    rain:[42,68,75,60,38,28,20],
+    flood:[78,85,72,55,38,25,18],
+    curfew:[32,55,68,48,28,20,15],
+    heatwave:[45,52,62,58,42,32,25],
+    fuel:[28,35,38,32,30,28,25],
+  };
+  const data = type ? stressed[type] : base;
+  const maxV = Math.max(...data);
+
+  document.getElementById('forecastBars').innerHTML = days.map((d, i) => {
+    const pct = Math.round(data[i] / maxV * 100);
+    const risk = data[i] > 60 ? 'var(--red)' : data[i] > 40 ? 'var(--amber)' : 'var(--green)';
+    return `
+      <div class="pred-bar">
+        <div class="pred-day">${d}</div>
+        <div class="pred-track"><div class="pred-fill" style="width:${pct}%;background:${risk};"></div></div>
+        <div class="pred-pct" style="color:${risk};">${data[i]}%</div>
+      </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// CLAIM LOG
+// ═══════════════════════════════════════════════════
+function addLog(icon, title, sub, type = 'info') {
+  const log = document.getElementById('claimLog');
+  // Remove empty state
+  const empty = log.querySelector('div[style*="text-align:center"]');
+  if (empty) empty.remove();
+
+  const now = new Date();
+  const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0') + ':' + now.getSeconds().toString().padStart(2,'0');
+  const entry = document.createElement('div');
+  entry.className = `log-entry log-${type}`;
+  entry.innerHTML = `
+    <div class="log-icon">${icon}</div>
+    <div class="log-content">
+      <div class="log-title">${title}</div>
+      <div class="log-sub">${sub}</div>
+    </div>
+    <div class="log-time">${time}</div>
+  `;
+  log.prepend(entry);
+}
+
+// ═══════════════════════════════════════════════════
+// DEMO TIMELINE
+// ═══════════════════════════════════════════════════
+const DEMO_STEPS = [
+  { icon:'👤', label:'Ravi Onboards', desc:'Ravi, 28, Bengaluru delivery partner. Signs up for GigGuard. Risk profile: Medium.', result:'Policy GG-2024-04821 created. Premium: ₹50/week.' },
+  { icon:'🌧️', label:'Disruption Detected', desc:'Heavy rain hits Bengaluru North. ARIA detects 42mm/hr — above IMD threshold.', result:'Workability Score drops to 32. Payout zone activated.' },
+  { icon:'🔍', label:'Zero-Touch Analysis', desc:'EDI = ₹850 − ₹470 = ₹380. Causation = 71%. 3 fraud checks: all passed.', result:'Systemic loss confirmed. Tier 2 payout eligible.' },
+  { icon:'💸', label:'Automatic Payout', desc:'₹247 (65% of EDI) auto-debited from Risk Pool. UPI transfer initiated.', result:'₹247 credited in 12 seconds. WhatsApp alert sent to Ravi.' },
+];
+
+function renderDemoTimeline() {
+  document.getElementById('demoTimeline').innerHTML = DEMO_STEPS.map((s, i) => `
+    <div class="dt-step" id="dts${i}">
+      <div class="dt-dot">${s.icon}</div>
+      <div class="dt-body">
+        <div class="dt-label">${s.label}</div>
+        <div class="dt-desc">${s.desc}</div>
+        <div class="dt-result">✅ ${s.result}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function runFullDemo() {
+  if (STATE.demoRunning) return;
+  STATE.demoRunning = true;
+  document.getElementById('demoCompleteMsg').style.display = 'none';
+
+  // Reset timeline
+  for (let i = 0; i < DEMO_STEPS.length; i++) {
+    const el = document.getElementById('dts'+i);
+    el.classList.remove('active','done');
+  }
+
+  // Trigger rain scenario first
+  await triggerScenario('rain');
+
+  // Run timeline
+  for (let i = 0; i < DEMO_STEPS.length; i++) {
+    const el = document.getElementById('dts'+i);
+    el.classList.add('active');
+    await delay(1800);
+    el.classList.remove('active');
+    el.classList.add('done');
+  }
+
+  document.getElementById('finalPayout').textContent = '247';
+  document.getElementById('demoCompleteMsg').style.display = 'block';
+  document.getElementById('emotionalBanner').style.display = 'block';
+  STATE.demoRunning = false;
+  showToast('🛡️', '"Ravi didn\'t file a claim."', 'The system protected him automatically. ₹247 in 4.2 seconds.');
+}
+
+// ═══════════════════════════════════════════════════
+// REGION HEATMAP
+// ═══════════════════════════════════════════════════
+const REGIONS = [
+  { name:'North Bengaluru', risk:72, active:3420 },
+  { name:'South Bengaluru', risk:38, active:2810 },
+  { name:'East Bengaluru',  risk:55, active:2140 },
+  { name:'Whitefield',     risk:28, active:1920 },
+  { name:'Outer Ring Rd',  risk:45, active:1640 },
+];
+
+function renderRegionHeatmap(scenario = null) {
+  const riskMod = scenario ? { rain:[98,75,88,60,70], flood:[99,90,95,72,85], curfew:[82,88,65,42,55] }[scenario] || null : null;
+  document.getElementById('regionHeatmap').innerHTML = REGIONS.map((r, i) => {
+    const risk = riskMod ? riskMod[i] : r.risk;
+    const col = risk > 70 ? 'var(--red)' : risk > 45 ? 'var(--amber)' : 'var(--green)';
+    return `
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="font-size:0.72rem;color:var(--muted);width:110px;flex-shrink:0;">${r.name}</div>
+        <div style="flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.06);overflow:hidden;">
+          <div style="width:${risk}%;height:100%;background:${col};border-radius:3px;transition:width 0.8s ease;"></div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:${col};width:28px;text-align:right;">${risk}%</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderTriggerPills() {
+  const triggers = [
+    { label:'Weather', count:145, color:'#3d8bff' },
+    { label:'AQI', count:92, color:'#f59e0b' },
+    { label:'Demand', count:210, color:'#f43f5e' },
+    { label:'Fuel', count:67, color:'#22c55e' },
+  ];
+  document.getElementById('triggerPills').innerHTML = triggers.map(t =>
+    `<div style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);">
+      <div style="width:5px;height:5px;border-radius:50%;background:${t.color};"></div>
+      <span style="font-size:0.68rem;color:var(--muted);">${t.label}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;font-weight:700;color:#fff;">${t.count}</span>
+    </div>`
+  ).join('');
+}
+
+function updateAdminOnScenario(sc) {
+  // Update region heatmap
+  renderRegionHeatmap(STATE.scenario);
+  // Update loss ratio
+  const newLossRatio = sc.workability < 30 ? '38.2%' : sc.workability < 50 ? '28.5%' : '22.5%';
+  document.getElementById('adminLossRatio').textContent = newLossRatio;
+  document.getElementById('adminLossRatio').style.color = sc.workability < 30 ? 'var(--red)' : 'var(--amber)';
+}
+
+// ═══════════════════════════════════════════════════
+// DEMO MODE (STEP-BY-STEP WITH BANNER)
+// ═══════════════════════════════════════════════════
+const DEMO_MODE_STEPS = [
+  { hint:'Step 1 of 4 — Meet Ravi, your delivery partner. View his live profile on the left.' },
+  { hint:'Step 2 of 4 — Trigger a scenario. Click "Heavy Rain" to see ARIA respond in real-time.' },
+  { hint:'Step 3 of 4 — Watch the Zero-Touch Claim Log fill up automatically. No human needed.' },
+  { hint:'Step 4 of 4 — See the payout calculation and Explainable AI premium breakdown.' },
+];
+let demoModeStep = 0;
+
+function launchDemoMode() {
+  document.getElementById('demoBanner').style.display = 'block';
+  document.getElementById('mainContent').style.marginTop = '42px';
+  demoModeStep = 0;
+  updateDemoStepUI();
+}
+function nextDemoStep() {
+  if (demoModeStep < DEMO_MODE_STEPS.length - 1) {
+    demoModeStep++;
+    updateDemoStepUI();
+    if (demoModeStep === 1) triggerScenario('rain');
+    if (demoModeStep === 3) setTimeout(() => renderXAI(SCENARIOS.rain), 400);
+  } else {
+    exitDemo();
+    runFullDemo();
+  }
+}
+function updateDemoStepUI() {
+  document.getElementById('demoHint').textContent = DEMO_MODE_STEPS[demoModeStep].hint;
+  document.querySelectorAll('.dsi').forEach((el, i) => {
+    el.className = 'dsi' + (i < demoModeStep ? ' done' : i === demoModeStep ? ' active' : '');
+  });
+  document.getElementById('demoNextBtn').textContent = demoModeStep === DEMO_MODE_STEPS.length - 1 ? '▶ Run Full Demo' : 'Next →';
+}
+function exitDemo() {
+  document.getElementById('demoBanner').style.display = 'none';
+  document.getElementById('mainContent').style.marginTop = '0';
+}
+
+// ═══════════════════════════════════════════════════
+// RESET
+// ═══════════════════════════════════════════════════
+function resetAll() {
+  STATE.scenario = null; STATE.workability = 82; STATE.edi = 0;
+  STATE.causation = 0.12; STATE.payout = 0; STATE.actual = 820;
+  STATE.deliveries = 18; STATE.premiumWeather = 12; STATE.premiumLocation = 10;
+  STATE.premiumDiscount = -8; STATE.claimCount = 0;
+
+  document.querySelectorAll('.sim-btn').forEach(b => b.className = 'sim-btn');
+  document.getElementById('scenarioPill').style.display = 'none';
+  document.getElementById('claimCount').textContent = '0 events';
+  document.getElementById('claimLog').innerHTML = '<div style="text-align:center;padding:30px 0;color:var(--muted);font-size:0.8rem;"><div style="font-size:1.5rem;margin-bottom:8px;">💤</div>No disruptions detected. Ravi is earning normally.</div>';
+  document.getElementById('demoCompleteMsg').style.display = 'none';
+  document.getElementById('emotionalBanner').style.display = 'none';
+
+  stopRain();
+  document.getElementById('curfewOverlay').style.display = 'none';
+  updateMetricDisplay();
+  renderEarningsChart();
+  renderConditions({temp:'31°C',rain:'2mm',wind:'14km/h',aqi:'88',flood:'Low',fuel:'₹102'});
+  renderXAI();
+  renderForecast();
+  renderRegionHeatmap();
+  renderDemoTimeline();
+  document.getElementById('adminLossRatio').textContent = '22.5%';
+  document.getElementById('adminLossRatio').style.color = 'var(--amber)';
+  showToast('↺', 'Simulation Reset', 'Ravi\'s environment restored to baseline conditions.');
+}
+
+// ═══════════════════════════════════════════════════
+// RAIN FX
+// ═══════════════════════════════════════════════════
+let rdrops = [];
+function startRain(count = 45) {
+  const ov = document.getElementById('rainOverlay');
+  ov.style.display = 'block';
+  rdrops.forEach(d => d.remove()); rdrops = [];
+  for (let i = 0; i < count; i++) {
+    const d = document.createElement('div'); d.className = 'rdrop';
+    d.style.left = Math.random() * 100 + 'vw';
+    d.style.height = (30 + Math.random() * 60) + 'px';
+    d.style.animationDuration = (0.4 + Math.random() * 0.8) + 's';
+    d.style.animationDelay = Math.random() * 2 + 's';
+    d.style.opacity = 0.3 + Math.random() * 0.3;
+    ov.appendChild(d); rdrops.push(d);
+  }
+}
+function stopRain() {
+  document.getElementById('rainOverlay').style.display = 'none';
+  rdrops.forEach(d => d.remove()); rdrops = [];
+}
+
+// ═══════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════
+function showToast(icon, title, msg) {
+  document.getElementById('ti').textContent = icon;
+  document.getElementById('tt').textContent = title;
+  document.getElementById('tm').textContent = msg;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 5000);
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+</script>
+</body>
+</html>

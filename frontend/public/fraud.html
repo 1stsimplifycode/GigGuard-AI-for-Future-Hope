@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARIA-Gig | Fraud Detection</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#040d1a;--navy2:#071428;--navy3:#0c1f3f;--blue:#1e6fff;--blue-l:#3d8bff;--teal:#2dd4bf;--amber:#fbbf24;--green:#22c55e;--red:#f43f5e;--red-l:#fb7185;--card:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.07);--text:#e2e8f0;--muted:#64748b;--white:#fff;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--text);display:flex;min-height:100vh;}
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:220px;background:var(--navy2);border-right:1px solid var(--border);z-index:100;padding:20px 0;display:flex;flex-direction:column;}
+.s-logo{padding:0 20px 20px;border-bottom:1px solid var(--border);margin-bottom:12px;font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:#fff;}
+.s-logo span{color:var(--teal);}
+.nav-link{display:flex;align-items:center;gap:10px;padding:11px 20px;color:var(--muted);font-size:0.83rem;cursor:pointer;transition:all 0.2s;border-left:2px solid transparent;text-decoration:none;}
+.nav-link:hover{color:#fff;background:var(--card);}
+.nav-link.active{color:var(--red-l);background:rgba(244,63,94,0.08);border-left-color:var(--red);}
+.s-section{padding:6px 20px 4px;font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em;font-weight:700;margin-top:8px;}
+.main{margin-left:220px;padding:28px 32px;flex:1;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:18px;}
+.card-title{font-family:'Syne',sans-serif;font-size:0.92rem;font-weight:700;color:#fff;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
+.badge{padding:3px 9px;border-radius:20px;font-size:0.65rem;font-weight:700;}
+.b-red{background:rgba(244,63,94,0.12);color:var(--red);}
+.b-green{background:rgba(34,197,94,0.12);color:var(--green);}
+.b-amber{background:rgba(251,191,36,0.12);color:var(--amber);}
+.b-teal{background:rgba(45,212,191,0.12);color:var(--teal);}
+.fraud-case{border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:all 0.25s;background:rgba(255,255,255,0.02);}
+.fraud-case:hover{border-color:rgba(244,63,94,0.3);background:rgba(244,63,94,0.04);}
+.fraud-case.selected{border-color:rgba(244,63,94,0.4);background:rgba(244,63,94,0.06);}
+.fraud-case.cleared{border-color:rgba(34,197,94,0.25);background:rgba(34,197,94,0.04);}
+.check-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;border:1px solid var(--border);background:rgba(255,255,255,0.02);margin-bottom:7px;transition:all 0.4s;}
+.check-row.pass{border-color:rgba(34,197,94,0.25);background:rgba(34,197,94,0.05);}
+.check-row.fail{border-color:rgba(244,63,94,0.3);background:rgba(244,63,94,0.07);}
+.cr-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.12);flex-shrink:0;transition:background 0.4s;}
+.check-row.pass .cr-dot{background:var(--green);}
+.check-row.fail .cr-dot{background:var(--red);}
+.cr-label{flex:1;font-size:0.76rem;color:var(--muted);transition:color 0.3s;}
+.check-row.pass .cr-label,.check-row.fail .cr-label{color:var(--text);}
+.cr-val{font-family:'JetBrains Mono',monospace;font-size:0.72rem;font-weight:600;}
+.score-meter{height:10px;border-radius:5px;background:rgba(255,255,255,0.06);overflow:hidden;margin:10px 0;}
+.score-fill{height:100%;border-radius:5px;transition:width 1s ease,background 0.5s;}
+.verdict-box{padding:16px 18px;border-radius:12px;text-align:center;margin-top:14px;}
+.verdict-approve{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);}
+.verdict-reject{background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.25);}
+.verdict-review{background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);}
+.btn-sim{padding:10px 20px;border-radius:9px;border:none;font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.btn-analyze{background:linear-gradient(135deg,var(--red),#be123c);color:#fff;box-shadow:0 4px 15px rgba(244,63,94,0.2);}
+.btn-analyze:hover{transform:translateY(-2px);}
+.btn-reset{background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--muted);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.animate-in{animation:slideIn 0.4s ease forwards;}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--navy2);border:1px solid var(--border);border-radius:14px;padding:14px 18px;max-width:300px;box-shadow:0 16px 50px rgba(0,0,0,0.5);transform:translateX(360px);transition:transform 0.5s cubic-bezier(0.34,1.56,0.64,1);z-index:999;}
+.toast.show{transform:translateX(0);}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"><div style="font-size:1.2rem;margin-bottom:4px;" id="ti">🔍</div><div style="font-family:'Syne',sans-serif;font-size:0.85rem;font-weight:700;color:#fff;" id="tt">Alert</div><div style="font-size:0.72rem;color:var(--muted);margin-top:2px;" id="tm"></div></div>
+
+<div class="sidebar">
+  <div class="s-logo">🛡️ ARIA<span>-Gig</span></div>
+  <div class="s-section">Simulation</div>
+  <a class="nav-link" href="demo.html"><span>🎬</span> Demo Engine</a>
+  <a class="nav-link" href="simulation.html"><span>⚡</span> Payout Sim</a>
+  <div class="s-section">Dashboards</div>
+  <a class="nav-link" href="dashboard.html"><span>🛵</span> Worker View</a>
+  <a class="nav-link" href="/"><span>📊</span> ARIA Analytics</a>
+  <div class="s-section">Features</div>
+  <a class="nav-link" href="income-shock.html"><span class="ni">📉</span> Income Shock</a>
+  <a class="nav-link active" href="fraud.html"><span>🔍</span> Fraud Detection</a>
+  <a class="nav-link" href="history.html"><span>📋</span> History & ROI</a>
+  <a class="nav-link" href="home.html"><span>🏠</span> Home</a>
+</div>
+
+<div class="main">
+  <div style="margin-bottom:24px;">
+    <h1 style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:#fff;">🔍 Intelligent Fraud Detection</h1>
+    <p style="font-size:0.83rem;color:var(--muted);margin-top:3px;">AI-powered anomaly detection for GigGuard claims — real-time scoring and verdict</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid-3">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;">
+      <div style="font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">Claims Analyzed</div>
+      <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:#fff;margin-top:6px;" id="totalAnalyzed">1,284</div>
+      <div style="font-size:0.7rem;color:var(--muted);margin-top:4px;">Last 30 days</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;">
+      <div style="font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">Fraud Blocked</div>
+      <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--red);margin-top:6px;" id="fraudBlocked">₹2.1L</div>
+      <div style="font-size:0.7rem;color:var(--muted);margin-top:4px;">48 flagged claims</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;">
+      <div style="font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">Accuracy Rate</div>
+      <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--green);margin-top:6px;">99.1%</div>
+      <div style="font-size:0.7rem;color:var(--muted);margin-top:4px;">0.9% false positive</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Case Selector -->
+    <div class="card">
+      <div class="card-title">📁 Simulated Claim Cases
+        <span class="badge b-red" id="selectedBadge">None Selected</span>
+      </div>
+      <div id="caseList"></div>
+    </div>
+
+    <!-- Analysis Panel -->
+    <div class="card">
+      <div class="card-title">🧠 Fraud Analysis Engine
+        <div style="display:flex;gap:8px;">
+          <button class="btn-sim btn-analyze" id="analyzeBtn" onclick="runAnalysis()" disabled>🔍 Analyze</button>
+          <button class="btn-sim btn-reset" onclick="resetAnalysis()">↺</button>
+        </div>
+      </div>
+
+      <div id="preAnalysis" style="text-align:center;padding:24px;color:var(--muted);font-size:0.8rem;">
+        <div style="font-size:2rem;margin-bottom:8px;">🔍</div>
+        Select a claim case and click Analyze to run fraud detection
+      </div>
+
+      <div id="analysisPanel" style="display:none;">
+        <div style="margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <span style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Fraud Confidence Score</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:800;" id="fraudScore">0%</span>
+          </div>
+          <div class="score-meter">
+            <div class="score-fill" id="scoreFill" style="width:0%;background:var(--green);"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.62rem;color:var(--muted);">
+            <span>0% Genuine</span><span>50% Review</span><span>100% Fraud</span>
+          </div>
+        </div>
+
+        <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;margin-bottom:8px;">Detection Checks</div>
+        <div id="checkRows"></div>
+
+        <div class="verdict-box" id="verdictBox">
+          <div style="font-size:1.5rem;" id="verdictIcon">⏳</div>
+          <div style="font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;color:#fff;margin-top:6px;" id="verdictTitle">Analyzing...</div>
+          <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;" id="verdictDesc"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fraud history log -->
+  <div class="card">
+    <div class="card-title">📋 Recent Fraud Decisions</div>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border);">
+          <th style="text-align:left;padding:0 0 10px;font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;">Rider ID</th>
+          <th style="text-align:left;padding:0 0 10px;font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;">Scenario</th>
+          <th style="text-align:left;padding:0 0 10px;font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;">Fraud Score</th>
+          <th style="text-align:left;padding:0 0 10px;font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;">Reason</th>
+          <th style="text-align:left;padding:0 0 10px;font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;">Decision</th>
+          <th style="text-align:left;padding:0 0 10px;font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;">Saved</th>
+        </tr>
+      </thead>
+      <tbody id="fraudHistory"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const CASES = [
+  {
+    id:'GG-CLAIM-001', rider:'Ravi Kumar', scenario:'Heavy Rain',
+    type:'genuine',
+    data:{ gps:'Confirmed in zone 560020', platform:'Online 6h before rain', weather:'IMD: 42mm confirmed', peers:'78% peers offline', history:'Regular Mon–Sat pattern' },
+    checks:[
+      { label:'GPS location in affected zone', result:'pass', val:'✓ Confirmed', detail:'Coordinates 12.97°N, 77.59°E in alert zone' },
+      { label:'Platform active before disruption', result:'pass', val:'✓ Online 6h', detail:'Last order: 14:22, rain started 15:40' },
+      { label:'IMD weather data cross-match', result:'pass', val:'✓ 42mm/hr', detail:'Nungambakkam station confirms heavy rain' },
+      { label:'Peer trend consistency', result:'pass', val:'✓ 78% offline', detail:'Zone-wide disruption pattern confirmed' },
+      { label:'Historical work pattern', result:'pass', val:'✓ Normal', detail:'Matches last 8-week ride schedule' },
+      { label:'Voluntary absence flag', result:'pass', val:'✓ Not set', detail:'No self-reported absence in system' },
+    ],
+    fraudScore:4,
+    verdict:'approve',
+    reason:'All 6 checks passed. Genuine disruption confirmed. Claim approved.'
+  },
+  {
+    id:'GG-CLAIM-002', rider:'Fake Account #472', scenario:'GPS Spoofing',
+    type:'fraud',
+    data:{ gps:'Spoofed to zone 560020', platform:'Last active 3 days ago', weather:'Clear sky at actual location', peers:'Only 12% peers offline', history:'First time claim attempt' },
+    checks:[
+      { label:'GPS location in affected zone', result:'fail', val:'✗ Spoofed', detail:'Actual location: Whitefield (30km away). Mock GPS detected.' },
+      { label:'Platform active before disruption', result:'fail', val:'✗ 3 days idle', detail:'Account dormant. No orders in 72 hours before claim.' },
+      { label:'IMD weather data cross-match', result:'fail', val:'✗ Clear sky', detail:'Actual GPS coords show 2mm rain only. No threshold breach.' },
+      { label:'Peer trend consistency', result:'pass', val:'✓ Area affected', detail:'Zone 560020 peers were offline — but rider wasn\'t there.' },
+      { label:'Historical work pattern', result:'fail', val:'✗ Anomaly', detail:'First ever claim. No prior 90-day ride history in affected zone.' },
+      { label:'Device fingerprint check', result:'fail', val:'✗ VPN flagged', detail:'IP geolocation mismatch. Mock location app detected.' },
+    ],
+    fraudScore:94,
+    verdict:'reject',
+    reason:'5/6 checks failed. GPS spoofing confirmed. Claim rejected. Account flagged for review.'
+  },
+  {
+    id:'GG-CLAIM-003', rider:'Meena D.', scenario:'Fake Weather Claim',
+    type:'fraud',
+    data:{ gps:'Zone matches', platform:'Active', weather:'Only 8mm rain (below threshold)', peers:'91% peers still riding', history:'3rd attempt this month' },
+    checks:[
+      { label:'GPS location in affected zone', result:'pass', val:'✓ In zone', detail:'Rider is genuinely in the claimed zone.' },
+      { label:'Platform active before disruption', result:'pass', val:'✓ Active', detail:'Normal activity before claim submission.' },
+      { label:'IMD weather data cross-match', result:'fail', val:'✗ 8mm only', detail:'IMD threshold requires 25mm/hr. Actual: 8mm. No trigger.' },
+      { label:'Peer trend consistency', result:'fail', val:'✗ 91% riding', detail:'91% of zone riders continued working. Not a disruption event.' },
+      { label:'Historical work pattern', result:'fail', val:'✗ 3rd attempt', detail:'Pattern: claims on rainy days even below threshold. Suspicious.' },
+      { label:'Claim frequency anomaly', result:'fail', val:'✗ Frequent', detail:'3 claims in 4 weeks vs 0.8 average for zone riders.' },
+    ],
+    fraudScore:82,
+    verdict:'reject',
+    reason:'Weather threshold not met. Peer data shows no disruption. Repeated attempt pattern flagged.'
+  },
+  {
+    id:'GG-CLAIM-004', rider:'Prakash R.', scenario:'Borderline Case',
+    type:'review',
+    data:{ gps:'Zone edge (300m outside)', platform:'Active', weather:'22mm rain (near threshold)', peers:'55% peers offline', history:'First claim, 6mo history' },
+    checks:[
+      { label:'GPS location in affected zone', result:'fail', val:'⚠ Zone edge', detail:'300m outside zone boundary. May be in coverage gap.' },
+      { label:'Platform active before disruption', result:'pass', val:'✓ Active', detail:'Online, orders accepted up to disruption time.' },
+      { label:'IMD weather data cross-match', result:'pass', val:'⚠ 22mm', detail:'Below 25mm threshold but adjacent station shows 28mm.' },
+      { label:'Peer trend consistency', result:'pass', val:'✓ 55% offline', detail:'Moderate disruption signal. Not conclusive alone.' },
+      { label:'Historical work pattern', result:'pass', val:'✓ 6mo history', detail:'Consistent rider. First claim in 6 months — not suspicious.' },
+      { label:'Zone boundary review', result:'fail', val:'⚠ Manual needed', detail:'Edge case: requires human review for zone expansion policy.' },
+    ],
+    fraudScore:38,
+    verdict:'review',
+    reason:'Borderline case. GPS zone edge + rain near threshold. Escalated for manual review. Not auto-rejected.'
+  },
+];
+
+let selectedCase = null;
+let analyzing = false;
+
+function renderCases() {
+  document.getElementById('caseList').innerHTML = CASES.map((c, i) => `
+    <div class="fraud-case ${c.type === 'genuine' ? '' : c.type === 'review' ? '' : ''}" onclick="selectCase(${i})" id="fc${i}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div style="font-size:0.83rem;font-weight:600;color:#fff;">${c.rider}</div>
+          <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;">${c.id} · ${c.scenario}</div>
+        </div>
+        <span class="badge ${c.type==='genuine'?'b-green':c.type==='review'?'b-amber':'b-red'}">
+          ${c.type==='genuine'?'✓ Genuine':c.type==='review'?'⚠ Review':'⛔ Fraud'}
+        </span>
+      </div>
+      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">
+        ${Object.entries(c.data).slice(0,2).map(([k,v]) =>
+          `<span style="font-size:0.65rem;padding:2px 7px;border-radius:5px;background:rgba(255,255,255,0.04);color:var(--muted);">${v}</span>`
+        ).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectCase(i) {
+  selectedCase = i;
+  document.querySelectorAll('.fraud-case').forEach((el, j) => {
+    el.classList.toggle('selected', j === i);
+  });
+  document.getElementById('selectedBadge').textContent = CASES[i].id;
+  document.getElementById('analyzeBtn').disabled = false;
+  document.getElementById('preAnalysis').style.display = 'none';
+  document.getElementById('analysisPanel').style.display = 'block';
+  // Reset
+  document.getElementById('fraudScore').textContent = '0%';
+  document.getElementById('scoreFill').style.width = '0%';
+  document.getElementById('checkRows').innerHTML = CASES[i].checks.map(ch => `
+    <div class="check-row" id="cr_${ch.label.replace(/\s/g,'_')}">
+      <div class="cr-dot"></div>
+      <div class="cr-label">${ch.label}</div>
+      <div class="cr-val" style="color:var(--muted);">⏳</div>
+    </div>
+  `).join('');
+  document.getElementById('verdictBox').className = 'verdict-box';
+  document.getElementById('verdictIcon').textContent = '⏳';
+  document.getElementById('verdictTitle').textContent = 'Ready to analyze...';
+  document.getElementById('verdictDesc').textContent = 'Click Analyze to run fraud detection';
+}
+
+async function runAnalysis() {
+  if (selectedCase === null || analyzing) return;
+  analyzing = true;
+  document.getElementById('analyzeBtn').disabled = true;
+  const c = CASES[selectedCase];
+
+  // Run checks one by one
+  for (const ch of c.checks) {
+    await delay(600);
+    const key = ch.label.replace(/\s/g,'_');
+    const row = document.getElementById('cr_'+key);
+    if (row) {
+      row.classList.add(ch.result);
+      row.querySelector('.cr-val').textContent = ch.val;
+      row.querySelector('.cr-val').style.color = ch.result === 'pass' ? 'var(--green)' : 'var(--red-l)';
+    }
+  }
+
+  // Animate score
+  await delay(300);
+  const targetScore = c.fraudScore;
+  for (let s = 0; s <= targetScore; s += 2) {
+    document.getElementById('fraudScore').textContent = s + '%';
+    document.getElementById('fraudScore').style.color = s > 70 ? 'var(--red)' : s > 40 ? 'var(--amber)' : 'var(--green)';
+    document.getElementById('scoreFill').style.width = s + '%';
+    document.getElementById('scoreFill').style.background = s > 70 ? 'var(--red)' : s > 40 ? 'var(--amber)' : 'var(--green)';
+    await delay(25);
+  }
+
+  // Verdict
+  await delay(400);
+  const box = document.getElementById('verdictBox');
+  if (c.verdict === 'approve') {
+    box.className = 'verdict-box verdict-approve';
+    document.getElementById('verdictIcon').textContent = '✅';
+    document.getElementById('verdictTitle').textContent = 'CLAIM APPROVED';
+    document.getElementById('verdictTitle').style.color = 'var(--green)';
+    showToast('✅', 'Claim Approved', c.reason);
+  } else if (c.verdict === 'reject') {
+    box.className = 'verdict-box verdict-reject';
+    document.getElementById('verdictIcon').textContent = '⛔';
+    document.getElementById('verdictTitle').textContent = 'CLAIM REJECTED — Fraud Detected';
+    document.getElementById('verdictTitle').style.color = 'var(--red)';
+    showToast('🚨', 'Fraud Detected — Claim Rejected', c.reason);
+    addFraudHistory(c);
+  } else {
+    box.className = 'verdict-box verdict-review';
+    document.getElementById('verdictIcon').textContent = '⚠️';
+    document.getElementById('verdictTitle').textContent = 'MANUAL REVIEW REQUIRED';
+    document.getElementById('verdictTitle').style.color = 'var(--amber)';
+    showToast('⚠️', 'Escalated for Manual Review', c.reason);
+  }
+  document.getElementById('verdictDesc').textContent = c.reason;
+  analyzing = false;
+  document.getElementById('analyzeBtn').disabled = false;
+}
+
+function resetAnalysis() {
+  selectedCase = null; analyzing = false;
+  document.querySelectorAll('.fraud-case').forEach(el => el.classList.remove('selected'));
+  document.getElementById('selectedBadge').textContent = 'None Selected';
+  document.getElementById('analyzeBtn').disabled = true;
+  document.getElementById('preAnalysis').style.display = 'block';
+  document.getElementById('analysisPanel').style.display = 'none';
+}
+
+function addFraudHistory(c) {
+  const tbody = document.getElementById('fraudHistory');
+  const row = document.createElement('tr');
+  row.style.borderBottom = '1px solid rgba(255,255,255,0.04)';
+  row.style.animation = 'slideIn 0.4s ease';
+  row.innerHTML = `
+    <td style="padding:12px 0;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--muted);">${c.id}</td>
+    <td style="padding:12px 0;font-size:0.8rem;color:var(--text);">${c.scenario}</td>
+    <td style="padding:12px 0;"><span style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:700;color:var(--red);">${c.fraudScore}%</span></td>
+    <td style="padding:12px 0;font-size:0.72rem;color:var(--muted);max-width:200px;">${c.checks.find(ch=>ch.result==='fail')?.detail || '—'}</td>
+    <td style="padding:12px 0;"><span class="badge b-red">Rejected</span></td>
+    <td style="padding:12px 0;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--green);">₹${Math.round(Math.random()*3000+1000).toLocaleString()}</td>
+  `;
+  tbody.prepend(row);
+}
+
+function seedHistory() {
+  const history = [
+    { id:'GG-F-4821', scenario:'GPS Spoofing', score:96, reason:'Location mock app detected', saved:'₹4,200' },
+    { id:'GG-F-3902', scenario:'Fake Rain Claim', score:84, reason:'IMD data mismatch', saved:'₹2,800' },
+    { id:'GG-F-2847', scenario:'Inactive Account', score:91, reason:'72hr inactivity before claim', saved:'₹3,500' },
+    { id:'GG-F-1293', scenario:'Peer Mismatch', score:78, reason:'90%+ peers still riding', saved:'₹1,900' },
+  ];
+  const tbody = document.getElementById('fraudHistory');
+  history.forEach(h => {
+    const row = document.createElement('tr');
+    row.style.borderBottom = '1px solid rgba(255,255,255,0.04)';
+    row.innerHTML = `
+      <td style="padding:12px 0;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--muted);">${h.id}</td>
+      <td style="padding:12px 0;font-size:0.8rem;">${h.scenario}</td>
+      <td style="padding:12px 0;font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:700;color:var(--red);">${h.score}%</td>
+      <td style="padding:12px 0;font-size:0.72rem;color:var(--muted);">${h.reason}</td>
+      <td style="padding:12px 0;"><span class="badge b-red">Rejected</span></td>
+      <td style="padding:12px 0;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--green);">${h.saved}</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function showToast(icon, title, msg) {
+  document.getElementById('ti').textContent = icon;
+  document.getElementById('tt').textContent = title;
+  document.getElementById('tm').textContent = msg;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 5000);
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+document.addEventListener('DOMContentLoaded', () => { renderCases(); seedHistory(); });
+</script>
+</body>
+</html>

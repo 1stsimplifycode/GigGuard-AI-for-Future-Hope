@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GigGuard – Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#0a0f1e;--navy2:#111827;--blue:#1e6fff;--blue-light:#3d8bff;--orange:#ff6b2b;--orange-light:#ff8c5a;--green:#00d68f;--red:#ff4757;--yellow:#ffd166;--card:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);--text:#e8eaf0;--muted:#7a8096;--white:#ffffff;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;display:flex;}
+  .sidebar{width:240px;background:var(--navy2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:28px 0;position:fixed;top:0;left:0;bottom:0;z-index:50;}
+  .sidebar-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--white);padding:0 24px 28px;border-bottom:1px solid var(--border);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .sidebar-logo span{color:var(--orange);}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:13px 24px;color:var(--muted);cursor:pointer;transition:all 0.2s;font-size:0.9rem;border-left:3px solid transparent;text-decoration:none;}
+  .nav-item:hover{color:var(--white);background:var(--card);}
+  .nav-item.active{color:var(--white);background:rgba(30,111,255,0.1);border-left-color:var(--blue);}
+  .nav-item .icon{font-size:1rem;width:20px;text-align:center;}
+  .sidebar-bottom{margin-top:auto;padding:16px 24px;border-top:1px solid var(--border);}
+  .rider-mini{display:flex;align-items:center;gap:10px;}
+  .rider-avatar{width:36px;height:36px;background:linear-gradient(135deg,var(--blue),var(--orange));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+  .rider-mini-name{font-size:0.85rem;color:var(--white);font-weight:500;}
+  .rider-mini-sub{font-size:0.72rem;color:var(--muted);}
+  .main{margin-left:240px;flex:1;padding:32px;}
+  .topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;gap:16px;flex-wrap:wrap;}
+  .topbar h1{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;color:var(--white);}
+  .topbar p{color:var(--muted);font-size:0.83rem;margin-top:2px;}
+  .topbar-pills{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .pill-tag{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--border);border-radius:50px;padding:9px 16px;font-size:0.8rem;}
+  .dot-live{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+  /* ZONE BANNER */
+  .zone-banner{background:rgba(255,107,43,0.06);border:1px solid rgba(255,107,43,0.15);border-radius:14px;padding:14px 20px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+  .zb-left{display:flex;align-items:center;gap:10px;}
+  .zb-icon{font-size:1.3rem;}
+  .zb-title{font-size:0.83rem;font-weight:600;color:var(--white);}
+  .zb-sub{font-size:0.75rem;color:var(--muted);margin-top:1px;}
+  .zb-right{display:flex;gap:16px;flex-wrap:wrap;}
+  .zb-stat{text-align:right;}
+  .zb-stat-label{font-size:0.7rem;color:var(--muted);}
+  .zb-stat-val{font-size:0.83rem;font-weight:600;color:var(--white);margin-top:1px;}
+
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
+  .metric-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 18px;position:relative;overflow:hidden;}
+  .metric-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+  .metric-card.blue::before{background:var(--blue);}
+  .metric-card.green::before{background:var(--green);}
+  .metric-card.orange::before{background:var(--orange);}
+  .metric-card.yellow::before{background:var(--yellow);}
+  .metric-label{font-size:0.72rem;color:var(--muted);margin-bottom:7px;text-transform:uppercase;letter-spacing:0.08em;}
+  .metric-val{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;color:var(--white);line-height:1;}
+  .metric-sub{font-size:0.72rem;color:var(--muted);margin-top:5px;}
+  .mbadge{display:inline-block;padding:2px 8px;border-radius:50px;font-size:0.68rem;font-weight:600;margin-top:5px;}
+  .bg-green{background:rgba(0,214,143,0.15);color:var(--green);}
+  .bg-blue{background:rgba(30,111,255,0.15);color:var(--blue-light);}
+  .bg-orange{background:rgba(255,107,43,0.15);color:var(--orange-light);}
+
+  .grid-2{display:grid;grid-template-columns:1.5fr 1fr;gap:20px;margin-bottom:20px;}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;}
+  .card-title{font-family:'Syne',sans-serif;font-size:0.97rem;font-weight:700;color:var(--white);margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;}
+
+  /* WORKABILITY */
+  .gauge-wrap{text-align:center;}
+  .gauge-svg{width:190px;height:105px;}
+  .gauge-num{font-family:'Syne',sans-serif;font-size:2.3rem;font-weight:800;color:var(--white);}
+  .gauge-lbl{font-size:0.77rem;color:var(--muted);margin-top:2px;}
+
+  .condition-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .condition-item{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;gap:8px;}
+  .cond-icon{font-size:1.2rem;}
+  .cond-name{font-size:0.72rem;color:var(--muted);}
+  .cond-val{font-size:0.87rem;font-weight:600;color:var(--white);}
+
+  /* POOLS */
+  .pool-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .pool-row:last-of-type{margin-bottom:0;}
+  .pool-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;flex-shrink:0;}
+  .pool-info{flex:1;}
+  .pool-name-lbl{font-size:0.78rem;font-weight:600;color:var(--white);}
+  .pool-bar-wrap{height:5px;background:var(--border);border-radius:4px;margin-top:3px;overflow:hidden;}
+  .pool-bar{height:100%;border-radius:4px;}
+  .pool-amt{font-size:0.82rem;font-weight:600;text-align:right;white-space:nowrap;}
+
+  /* INCOME PAYOUT CARD */
+  .income-payout-card{background:rgba(0,214,143,0.05);border:1px solid rgba(0,214,143,0.15);border-radius:12px;padding:14px;margin-top:16px;}
+  .ipc-title{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;font-weight:600;}
+  .ipc-row{display:flex;justify-content:space-between;font-size:0.8rem;padding:4px 0;}
+  .ipc-key{color:var(--muted);}
+  .ipc-val{font-weight:600;}
+
+  .safety-btn{width:100%;background:linear-gradient(135deg,var(--red),#c0392b);color:white;padding:16px;border-radius:12px;font-size:0.95rem;font-weight:700;border:none;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;box-shadow:0 8px 24px rgba(255,71,87,0.3);font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;}
+  .safety-btn:hover{transform:translateY(-2px);}
+  .simulate-btn{width:100%;background:transparent;color:var(--orange);padding:13px;border-radius:12px;font-size:0.87rem;font-weight:600;border:1px solid rgba(255,107,43,0.3);cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;}
+  .simulate-btn:hover{background:rgba(255,107,43,0.08);}
+
+  .h-table{width:100%;border-collapse:collapse;}
+  .h-table th{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;padding:0 0 10px;text-align:left;border-bottom:1px solid var(--border);font-weight:600;}
+  .h-table td{padding:13px 0;font-size:0.82rem;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;}
+  .h-table tr:last-child td{border-bottom:none;}
+  .spill{padding:3px 9px;border-radius:50px;font-size:0.68rem;font-weight:600;}
+  .s-paid{background:rgba(0,214,143,0.15);color:var(--green);}
+  .s-clear{background:rgba(30,111,255,0.15);color:var(--blue-light);}
+  .s-pending{background:rgba(255,209,102,0.15);color:var(--yellow);}
+
+  .streak-dots{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap;}
+  .sdot{width:9px;height:9px;border-radius:50%;}
+
+  .toast{position:fixed;bottom:28px;right:28px;background:var(--navy2);border:1px solid var(--border);border-radius:14px;padding:16px 20px;max-width:300px;box-shadow:0 20px 60px rgba(0,0,0,0.5);transform:translateX(380px);transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);z-index:200;}
+  .toast.show{transform:translateX(0);}
+  .toast-icon{font-size:1.4rem;margin-bottom:6px;}
+  .toast-title{font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;color:var(--white);margin-bottom:3px;}
+  .toast-msg{font-size:0.77rem;color:var(--muted);line-height:1.5;}
+
+  @media(max-width:900px){.grid-4{grid-template-columns:repeat(2,1fr);}.grid-2{grid-template-columns:1fr;}.grid-3{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sidebar-logo">🛡️ Gig<span>Guard</span></div>
+  <a class="nav-item active" href="dashboard.html"><span class="icon">📊</span> Dashboard</a>
+    <a class="nav-item" href="demo.html"><span class="icon">🎬</span> Demo Engine</a>
+  <a class="nav-item" href="fraud.html"><span class="icon">🔍</span> Fraud Detection</a>
+  <a class="nav-item" href="simulation.html"><span class="icon">⚡</span> Payout Simulation</a>
+  <a class="nav-item" href="history.html"><span class="icon">📋</span> History & Cashback</a>
+  <a class="nav-item" href="home.html"><span class="icon">🏠</span> Home</a>
+  <div class="sidebar-bottom">
+    <div class="rider-mini">
+      <div class="rider-avatar">🏍️</div>
+      <div>
+        <div class="rider-mini-name" id="sidebar-name">Rahul Kumar</div>
+        <div class="rider-mini-sub" id="sidebar-city">Chennai · Swiggy</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h1>Good morning, <span id="top-name">Rahul</span> 👋</h1>
+      <p>Your income is protected. Here's today's overview.</p>
+    </div>
+    <div class="topbar-pills">
+      <div class="pill-tag"><div class="dot-live"></div><span id="weatherText">☀️ Clear – Safe to ride</span></div>
+    </div>
+  </div>
+
+  <!-- HYPERLOCAL ZONE BANNER -->
+  <div class="zone-banner">
+    <div class="zb-left">
+      <div class="zb-icon">📍</div>
+      <div>
+        <div class="zb-title" id="zb-zone">North Chennai Coastal Belt · 600001</div>
+        <div class="zb-sub" id="zb-station">IMD Station: Nungambakkam Observatory · Data refreshed 2 min ago</div>
+      </div>
+    </div>
+    <div class="zb-right">
+      <div class="zb-stat">
+        <div class="zb-stat-label">Zone Risk</div>
+        <div class="zb-stat-val" id="zb-risk">🟡 Moderate</div>
+      </div>
+      <div class="zb-stat">
+        <div class="zb-stat-label">Coverage</div>
+        <div class="zb-stat-val" style="color:var(--green)">✅ Active</div>
+      </div>
+      <div class="zb-stat">
+        <div class="zb-stat-label">Payout Range</div>
+        <div class="zb-stat-val" id="zb-payout" style="color:var(--orange)">₹80–₹300</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- METRICS -->
+  <div class="grid-4">
+    <div class="metric-card blue">
+      <div class="metric-label">Weekly Premium</div>
+      <div class="metric-val">₹50</div>
+      <div class="mbadge bg-blue">Flat for everyone</div>
+    </div>
+    <div class="metric-card green">
+      <div class="metric-label">Your Payout Range</div>
+      <div class="metric-val" style="font-size:1.25rem">₹80–₹300</div>
+      <div class="metric-sub" style="color:var(--muted);font-size:0.7rem">Risk Pool ÷ Affected Riders</div>
+    </div>
+    <div class="metric-card orange">
+      <div class="metric-label">Total Earned Back</div>
+      <div class="metric-val" id="m-earned">₹1,100</div>
+      <div class="mbadge bg-orange">Payouts + cashback</div>
+    </div>
+    <div class="metric-card yellow">
+      <div class="metric-label">Savings Pool</div>
+      <div class="metric-val">₹120</div>
+      <div class="metric-sub" id="savings-sub" style="color:var(--green);cursor:pointer;text-decoration:underline dotted;" onclick="withdrawSavings()">Withdraw anytime →</div>
+    </div>
+  </div>
+
+  <!-- ROW 2 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">
+        Workability Score
+        <span class="mbadge bg-green" id="scoreTag">● SAFE</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:24px;">
+        <div class="gauge-wrap">
+          <svg class="gauge-svg" viewBox="0 0 190 105">
+            <path d="M15,95 A75,75 0 0,1 175,95" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="14" stroke-linecap="round"/>
+            <path id="gaugePath" d="M15,95 A75,75 0 0,1 175,95" fill="none" stroke="url(#gGrad)" stroke-width="14" stroke-linecap="round" stroke-dasharray="236" stroke-dashoffset="59"/>
+            <defs><linearGradient id="gGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ff4757"/><stop offset="50%" stop-color="#ffd166"/><stop offset="100%" stop-color="#00d68f"/></linearGradient></defs>
+          </svg>
+          <div class="gauge-num" id="gaugeNum">78</div>
+          <div class="gauge-lbl">out of 100</div>
+        </div>
+        <div style="flex:1">
+          <div class="condition-grid">
+            <div class="condition-item"><div class="cond-icon">🌧️</div><div><div class="cond-name">Rainfall</div><div class="cond-val" id="cRain">2mm</div></div></div>
+            <div class="condition-item"><div class="cond-icon">🌡️</div><div><div class="cond-name">Temp</div><div class="cond-val" id="cTemp">31°C</div></div></div>
+            <div class="condition-item"><div class="cond-icon">💨</div><div><div class="cond-name">Wind</div><div class="cond-val" id="cWind">14 km/h</div></div></div>
+            <div class="condition-item"><div class="cond-icon">😷</div><div><div class="cond-name">AQI</div><div class="cond-val" id="cAqi">88</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Your Pools</div>
+      <div class="pool-row">
+        <div class="pool-icon" style="background:rgba(30,111,255,0.15)">🛡️</div>
+        <div class="pool-info"><div class="pool-name-lbl">Risk Pool</div><div class="pool-bar-wrap"><div class="pool-bar" style="width:75%;background:var(--blue)"></div></div></div>
+        <div class="pool-amt" style="color:var(--blue-light)">₹3,750</div>
+      </div>
+      <div class="pool-row">
+        <div class="pool-icon" style="background:rgba(0,214,143,0.15)">🤝</div>
+        <div class="pool-info"><div class="pool-name-lbl">Community Fund</div><div class="pool-bar-wrap"><div class="pool-bar" style="width:55%;background:var(--green)"></div></div></div>
+        <div class="pool-amt" style="color:var(--green)">₹1,250</div>
+      </div>
+      <div class="pool-row">
+        <div class="pool-icon" style="background:rgba(255,107,43,0.15)">💰</div>
+        <div class="pool-info"><div class="pool-name-lbl">Your Savings</div><div class="pool-bar-wrap"><div class="pool-bar" style="width:30%;background:var(--orange)"></div></div></div>
+        <div class="pool-amt" style="color:var(--orange)">₹120</div>
+      </div>
+
+      <div class="income-payout-card">
+        <div class="ipc-title">Your Disruption Compensation</div>
+        <div class="ipc-row"><span class="ipc-key">🌧️ Heavy Rain</span><span class="ipc-val" style="color:var(--blue-light)">₹80–₹300</span></div>
+        <div class="ipc-row"><span class="ipc-key">🌡️ Extreme Heat</span><span class="ipc-val" style="color:var(--orange)">₹80–₹300</span></div>
+        <div class="ipc-row"><span class="ipc-key">🌊 Flood Alert</span><span class="ipc-val" style="color:var(--red)">₹80–₹300</span></div>
+        <div style="margin-top:10px;padding:10px 12px;background:rgba(255,209,102,0.06);border:1px solid rgba(255,209,102,0.12);border-radius:8px;font-size:0.73rem;color:var(--muted);line-height:1.5">
+          🧮 <strong style="color:var(--yellow)">Dynamic formula:</strong> Risk Pool ÷ Affected Riders in your zone. Fewer affected = higher payout. Minimum guaranteed ₹80.
+        </div>
+      </div>
+
+      <!-- Savings withdraw -->
+      <div style="margin-top:14px;background:rgba(255,107,43,0.07);border:1px solid rgba(255,107,43,0.2);border-radius:12px;padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <div>
+          <div style="font-size:0.78rem;font-weight:600;color:var(--orange-light)">💰 Your Savings Pool</div>
+          <div style="font-size:0.72rem;color:var(--muted);margin-top:2px">₹120 available · Yours to keep anytime</div>
+        </div>
+        <button onclick="withdrawSavings()" style="background:var(--orange);color:white;border:none;padding:8px 16px;border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">Withdraw →</button>
+      </div>
+
+      <button class="safety-btn" onclick="triggerSafetyPause()">🆘 Safety Pause – I Feel Unsafe</button>
+      <button class="simulate-btn" onclick="window.location.href='simulation.html'">⚡ Simulate Rain Event →</button>
+    </div>
+  </div>
+
+  <!-- ROW 3 -->
+  <div class="grid-3">
+    <div class="card" style="grid-column:span 2">
+      <div class="card-title">Recent Activity</div>
+      <table class="h-table">
+        <tr><th>Date</th><th>Event</th><th>Zone</th><th>Payout</th><th>Status</th></tr>
+        <tr>
+          <td style="color:var(--muted)">Mar 17</td>
+          <td>Heavy Rain</td>
+          <td style="color:var(--muted);font-size:0.75rem" id="zone-col-1">600001</td>
+          <td style="color:var(--green);font-weight:600" id="pay-col-1">+₹700</td>
+          <td><span class="spill s-paid">Paid</span></td>
+        </tr>
+        <tr>
+          <td style="color:var(--muted)">Mar 10</td>
+          <td>Clear Week</td>
+          <td style="color:var(--muted);font-size:0.75rem" id="zone-col-2">600001</td>
+          <td style="color:var(--blue-light)">Cashback ₹10</td>
+          <td><span class="spill s-clear">Saved</span></td>
+        </tr>
+        <tr>
+          <td style="color:var(--muted)">Mar 3</td>
+          <td>Extreme Heat</td>
+          <td style="color:var(--muted);font-size:0.75rem" id="zone-col-3">600001</td>
+          <td style="color:var(--green);font-weight:600" id="pay-col-3">+₹700</td>
+          <td><span class="spill s-paid">Paid</span></td>
+        </tr>
+        <tr>
+          <td style="color:var(--muted)">Feb 24</td>
+          <td>Clear Week</td>
+          <td style="color:var(--muted);font-size:0.75rem" id="zone-col-4">600001</td>
+          <td style="color:var(--blue-light)">Cashback ₹10</td>
+          <td><span class="spill s-clear">Saved</span></td>
+        </tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">Streak 🔥</div>
+      <div style="font-family:'Syne',sans-serif;font-size:2.4rem;font-weight:800;color:var(--white)">6</div>
+      <div style="color:var(--muted);font-size:0.78rem;margin-top:3px">Weeks consistent</div>
+      <div class="streak-dots" style="margin-top:14px">
+        <div class="sdot" style="background:var(--green)"></div><div class="sdot" style="background:var(--green)"></div>
+        <div class="sdot" style="background:var(--green)"></div><div class="sdot" style="background:var(--green)"></div>
+        <div class="sdot" style="background:var(--green)"></div><div class="sdot" style="background:var(--green)"></div>
+        <div class="sdot" style="background:rgba(255,255,255,0.1)"></div><div class="sdot" style="background:rgba(255,255,255,0.1)"></div>
+        <div class="sdot" style="background:rgba(255,255,255,0.1)"></div><div class="sdot" style="background:rgba(255,255,255,0.1)"></div>
+      </div>
+      <div style="margin-top:14px;padding:10px 12px;background:rgba(255,209,102,0.07);border:1px solid rgba(255,209,102,0.15);border-radius:9px;">
+        <div style="font-size:0.73rem;color:var(--yellow);font-weight:600">🎯 2 more weeks</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:1px">to unlock loyalty bonus</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW YOUR MONEY IS PROTECTED -->
+  <div style="margin-top:24px">
+    <div class="card">
+      <div class="card-title">🔐 How Your Money is Protected</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;">
+
+        <!-- Layer 1: Community Risk Pool -->
+        <div style="background:rgba(30,111,255,0.07);border:1px solid rgba(30,111,255,0.15);border-radius:14px;padding:20px 18px;">
+          <div style="font-size:1.6rem;margin-bottom:10px">🤝</div>
+          <div style="font-family:'Syne',sans-serif;font-size:0.88rem;font-weight:700;color:var(--white);margin-bottom:6px">Layer 1 – Community Risk Pool</div>
+          <div style="font-size:0.78rem;color:var(--muted);line-height:1.6">100 riders each pay ₹50/week. <strong style="color:var(--text)">₹30 (60%) → Risk Pool.</strong> When unsafe weather hits your zone, Risk Pool ÷ Affected Riders = your automatic payout. Riders protect each other — no insurer needed.</div>
+        </div>
+
+        <!-- Layer 2: SHG Community Fund -->
+        <div style="background:rgba(0,214,143,0.07);border:1px solid rgba(0,214,143,0.15);border-radius:14px;padding:20px 18px;">
+          <div style="font-size:1.6rem;margin-bottom:10px">🏦</div>
+          <div style="font-family:'Syne',sans-serif;font-size:0.88rem;font-weight:700;color:var(--white);margin-bottom:6px">Layer 2 – SHG Community Fund</div>
+          <div style="font-size:0.78rem;color:var(--muted);line-height:1.6"><strong style="color:var(--text)">₹10 (20%) → Community Fund</strong> — inspired by Self Help Groups. Used for emergency backup when Risk Pool runs short, small micro-loans for riders in need, and community support between members.</div>
+        </div>
+
+        <!-- Layer 3: Savings & Cashback -->
+        <div style="background:rgba(255,107,43,0.07);border:1px solid rgba(255,107,43,0.15);border-radius:14px;padding:20px 18px;">
+          <div style="font-size:1.6rem;margin-bottom:10px">💰</div>
+          <div style="font-family:'Syne',sans-serif;font-size:0.88rem;font-weight:700;color:var(--white);margin-bottom:6px">Layer 3 – Your Savings Pool</div>
+          <div style="font-size:0.78rem;color:var(--muted);line-height:1.6"><strong style="color:var(--text)">₹10 (20%) → Your Savings</strong> — this is always yours. Withdraw anytime you need it. If you don't claim a payout in a week, that week's share accumulates. Premium is <strong style="color:var(--orange)">never wasted.</strong></div>
+        </div>
+      </div>
+
+      <!-- AUTOMATION PAYMENT PROCESS FLOW -->
+      <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:14px;padding:20px;">
+        <div style="font-size:0.75rem;color:var(--blue-light);margin-bottom:16px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600">⚙️ Automated Payment Process — How it works end to end</div>
+        <div style="display:flex;align-items:stretch;gap:0;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;">
+
+          <div style="background:rgba(30,111,255,0.1);border:1px solid rgba(30,111,255,0.2);border-radius:10px;padding:12px 14px;font-size:0.75rem;text-align:center;min-width:100px;flex-shrink:0;">
+            <div style="font-size:1.1rem;margin-bottom:5px">🏍️</div>
+            <div style="color:var(--white);font-weight:700;margin-bottom:3px">Rider Pays</div>
+            <div style="color:var(--muted);font-size:0.68rem">₹50 auto-deducted from Swiggy/Zomato earnings weekly</div>
+          </div>
+          <div style="display:flex;align-items:center;padding:0 6px;color:var(--muted);font-size:1.2rem;flex-shrink:0;">→</div>
+
+          <div style="background:rgba(30,111,255,0.1);border:1px solid rgba(30,111,255,0.2);border-radius:10px;padding:12px 14px;font-size:0.75rem;text-align:center;min-width:100px;flex-shrink:0;">
+            <div style="font-size:1.1rem;margin-bottom:5px">🗂️</div>
+            <div style="color:var(--white);font-weight:700;margin-bottom:3px">Pool Split</div>
+            <div style="color:var(--muted);font-size:0.68rem">₹30 Risk · ₹10 SHG · ₹10 Savings — auto-allocated</div>
+          </div>
+          <div style="display:flex;align-items:center;padding:0 6px;color:var(--muted);font-size:1.2rem;flex-shrink:0;">→</div>
+
+          <div style="background:rgba(255,209,102,0.08);border:1px solid rgba(255,209,102,0.2);border-radius:10px;padding:12px 14px;font-size:0.75rem;text-align:center;min-width:100px;flex-shrink:0;">
+            <div style="font-size:1.1rem;margin-bottom:5px">🛰️</div>
+            <div style="color:var(--white);font-weight:700;margin-bottom:3px">IMD Monitors</div>
+            <div style="color:var(--muted);font-size:0.68rem">Hyperlocal weather polled every 15 min per pincode</div>
+          </div>
+          <div style="display:flex;align-items:center;padding:0 6px;color:var(--muted);font-size:1.2rem;flex-shrink:0;">→</div>
+
+          <div style="background:rgba(255,107,43,0.1);border:1px solid rgba(255,107,43,0.2);border-radius:10px;padding:12px 14px;font-size:0.75rem;text-align:center;min-width:100px;flex-shrink:0;">
+            <div style="font-size:1.1rem;margin-bottom:5px">🧠</div>
+            <div style="color:var(--white);font-weight:700;margin-bottom:3px">AI Scores</div>
+            <div style="color:var(--muted);font-size:0.68rem">Workability Score calculated · unsafe zones flagged</div>
+          </div>
+          <div style="display:flex;align-items:center;padding:0 6px;color:var(--muted);font-size:1.2rem;flex-shrink:0;">→</div>
+
+          <div style="background:rgba(255,71,87,0.1);border:1px solid rgba(255,71,87,0.2);border-radius:10px;padding:12px 14px;font-size:0.75rem;text-align:center;min-width:110px;flex-shrink:0;">
+            <div style="font-size:1.1rem;margin-bottom:5px">📍</div>
+            <div style="color:var(--white);font-weight:700;margin-bottom:3px">GPS Verified</div>
+            <div style="color:var(--muted);font-size:0.68rem">Rider confirmed in affected zone · fraud check passed</div>
+          </div>
+          <div style="display:flex;align-items:center;padding:0 6px;color:var(--muted);font-size:1.2rem;flex-shrink:0;">→</div>
+
+          <div style="background:rgba(0,214,143,0.1);border:1px solid rgba(0,214,143,0.25);border-radius:10px;padding:12px 14px;font-size:0.75rem;text-align:center;min-width:110px;flex-shrink:0;">
+            <div style="font-size:1.1rem;margin-bottom:5px">🧮</div>
+            <div style="color:var(--white);font-weight:700;margin-bottom:3px">Calc Payout</div>
+            <div style="color:var(--muted);font-size:0.68rem">Risk Pool ÷ Affected Riders = ₹80–₹300 per rider</div>
+          </div>
+          <div style="display:flex;align-items:center;padding:0 6px;color:var(--muted);font-size:1.2rem;flex-shrink:0;">→</div>
+
+          <div style="background:rgba(0,214,143,0.14);border:1px solid rgba(0,214,143,0.35);border-radius:10px;padding:12px 14px;font-size:0.75rem;text-align:center;min-width:100px;flex-shrink:0;">
+            <div style="font-size:1.1rem;margin-bottom:5px">💸</div>
+            <div style="color:var(--green);font-weight:700;margin-bottom:3px">Auto Credited</div>
+            <div style="color:var(--muted);font-size:0.68rem">Money in account · WhatsApp alert · ~12 seconds total</div>
+          </div>
+        </div>
+
+        <!-- Non-affected riders note -->
+        <div style="margin-top:14px;display:flex;align-items:center;gap:10px;padding:11px 14px;background:rgba(255,107,43,0.06);border:1px solid rgba(255,107,43,0.15);border-radius:10px;">
+          <div style="font-size:1rem;flex-shrink:0;">🎁</div>
+          <div style="font-size:0.76rem;color:var(--muted);line-height:1.5;">
+            <strong style="color:var(--orange-light)">Non-affected riders (clear zones):</strong> No payout triggered → their ₹10 savings share accumulates → <strong style="color:var(--white)">withdraw anytime from Savings Pool</strong> or let it grow for bigger cashback.
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;padding:12px 16px;background:rgba(0,214,143,0.05);border:1px solid rgba(0,214,143,0.12);border-radius:10px;font-size:0.78rem;color:var(--muted);line-height:1.6">
+        ✅ <strong style="color:var(--green)">This is Parametric Insurance</strong> — payout triggers automatically when a condition is met (bad weather), not when you file a claim. <strong style="color:var(--text)">Riders fund each other. AI manages it. Your savings are always yours.</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WITHDRAW MODAL -->
+<div id="withdrawModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:300;display:none;align-items:center;justify-content:center;">
+  <div style="background:var(--navy2);border:1px solid var(--border);border-radius:20px;padding:36px;max-width:380px;width:90%;animation:fadeUp 0.3s ease;">
+    <div style="font-size:1.8rem;margin-bottom:10px;">💰</div>
+    <div style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;color:var(--white);margin-bottom:6px;">Withdraw Savings</div>
+    <div style="font-size:0.82rem;color:var(--muted);margin-bottom:20px;">Your savings pool balance is always yours. Withdraw anytime.</div>
+    <div style="background:rgba(0,214,143,0.08);border:1px solid rgba(0,214,143,0.2);border-radius:12px;padding:16px;text-align:center;margin-bottom:20px;">
+      <div style="font-size:0.75rem;color:var(--muted);">Available Balance</div>
+      <div style="font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;color:var(--green);">₹120</div>
+      <div style="font-size:0.72rem;color:var(--muted);margin-top:4px;">Accumulated over 6 weeks</div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="closeWithdraw()" style="flex:1;padding:13px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.88rem;">Cancel</button>
+      <button onclick="doWithdraw()" style="flex:2;padding:13px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--green),#00a86b);color:white;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:600;">Withdraw to UPI →</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <div class="toast-icon" id="toastIcon">🆘</div>
+  <div class="toast-title" id="toastTitle">Safety Pause Activated</div>
+  <div class="toast-msg" id="toastMsg">Verifying your zone. Compensation coming.</div>
+</div>
+
+<script>
+  const user = JSON.parse(localStorage.getItem('gigguard_user') || '{"name":"Rahul Kumar","city":"Chennai","platform":"Swiggy","income":700,"pin":"600001","station":"Nungambakkam Observatory","zone":"North Chennai Coastal Belt","risk":"🟡 Moderate"}');
+  const fname = (user.name || 'Rahul Kumar').split(' ')[0];
+  const income = user.income || 700;
+
+  document.getElementById('top-name').textContent = fname;
+  document.getElementById('sidebar-name').textContent = user.name || 'Rahul Kumar';
+  document.getElementById('sidebar-city').textContent = (user.city || 'Chennai') + ' · ' + (user.platform || 'Swiggy');
+
+  // Zone banner
+  document.getElementById('zb-zone').textContent = (user.zone || 'Zone') + ' · ' + (user.pin || '600001');
+  document.getElementById('zb-station').textContent = 'IMD Station: ' + (user.station || 'City Observatory') + ' · Data refreshed 2 min ago';
+  document.getElementById('zb-risk').textContent = user.risk || '🟡 Moderate';
+
+  // Metrics
+  document.getElementById('m-earned').textContent = '₹1,100';
+
+  // Zone in table
+  const pin = user.pin || '600001';
+  ['zone-col-1','zone-col-2','zone-col-3','zone-col-4'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.textContent = pin;
+  });
+  const income = user.income || 700;
+  const p1 = document.getElementById('pay-col-1'); if(p1) p1.textContent = '+₹' + income;
+  const p3 = document.getElementById('pay-col-3'); if(p3) p3.textContent = '+₹' + income;
+
+  // Gauge animation
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('gaugePath').style.strokeDashoffset = 59;
+      document.getElementById('gaugePath').style.transition = 'stroke-dashoffset 1.5s ease';
+    }, 300);
+  });
+
+  function triggerSafetyPause() {
+    showToast('🆘', 'Safety Pause Activated', 'GPS verified. Dynamic payout (₹80–₹300) being calculated from Risk Pool for your zone.');
+  }
+  function withdrawSavings() {
+    document.getElementById('withdrawModal').style.display = 'flex';
+  }
+  function closeWithdraw() {
+    document.getElementById('withdrawModal').style.display = 'none';
+  }
+  function doWithdraw() {
+    document.getElementById('withdrawModal').style.display = 'none';
+    showToast('✅', '₹120 Withdrawal Initiated', 'Your savings are being transferred to your UPI. Usually arrives in 2–5 minutes.');
+    document.getElementById('savings-sub').textContent = '₹0 · Withdrawn today';
+    document.getElementById('savings-sub').style.color = 'var(--muted)';
+    document.getElementById('savings-sub').style.cursor = 'default';
+    document.getElementById('savings-sub').onclick = null;
+  }
+  function showToast(icon, title, msg) {
+    document.getElementById('toastIcon').textContent = icon;
+    document.getElementById('toastTitle').textContent = title;
+    document.getElementById('toastMsg').textContent = msg;
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 4000);
+  }
+</script>
+</body>
+</html>
+<!-- ARIA-Gig Causation & EDI enhancement panel injected below streak card -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Add ARIA-Gig model panel after main content
+  const main = document.querySelector('.main');
+  if (!main) return;
+
+  const user = JSON.parse(localStorage.getItem('gigguard_user') || '{}');
+  const income = user.income || 700;
+
+  // --- Geopolitical Stress Toggle ---
+  const stressDiv = document.createElement('div');
+  stressDiv.style.cssText = 'margin-top:24px;';
+  stressDiv.innerHTML = `
+    <div style="background:rgba(255,71,87,0.05);border:1px solid rgba(255,71,87,0.2);border-radius:18px;padding:24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:#fff;">🌍 Global Economic Stress Mode</div>
+          <div style="font-size:0.78rem;color:var(--muted);margin-top:3px;">Simulates Iran–Israel conflict: fuel spike + demand collapse</div>
+        </div>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <span style="font-size:0.83rem;color:var(--muted);" id="stressLabel">Off</span>
+          <div id="stressToggle" onclick="toggleStress()" style="width:44px;height:24px;border-radius:12px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);position:relative;cursor:pointer;transition:all 0.3s;">
+            <div id="stressThumb" style="position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#7a8096;transition:all 0.3s;"></div>
+          </div>
+        </label>
+      </div>
+      <div id="ariaPanel" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;"></div>
+    </div>
+  `;
+  main.appendChild(stressDiv);
+
+  // --- EDI + Causation Model Panel ---
+  let stressActive = false;
+
+  function renderARIA(stress) {
+    const expectedEarnings = income;
+    const actualEarnings = stress ? Math.round(income * 0.45) : Math.round(income * (0.78 + Math.random() * 0.2));
+    const edi = Math.max(0, expectedEarnings - actualEarnings);
+    const lossPct = Math.round(edi / expectedEarnings * 100);
+
+    const env   = stress ? (0.62 + Math.random()*0.2).toFixed(2) : (0.12 + Math.random()*0.15).toFixed(2);
+    const peer  = stress ? (0.55 + Math.random()*0.2).toFixed(2) : (0.10 + Math.random()*0.12).toFixed(2);
+    const dem   = stress ? (0.60 + Math.random()*0.2).toFixed(2) : (0.15 + Math.random()*0.15).toFixed(2);
+    const indDev = (Math.random()*0.08).toFixed(2);
+    const causation = Math.min(1, (0.40*parseFloat(env) + 0.30*parseFloat(peer) + 0.30*parseFloat(dem) - 0.25*parseFloat(indDev))).toFixed(2);
+    const workability = stress ? Math.round(22 + Math.random()*18) : Math.round(62 + Math.random()*25);
+    const isSystemic = parseFloat(causation) >= 0.4 && workability < 50;
+    const fuel = stress ? (102.5 * (1.12 + Math.random()*0.1)).toFixed(1) : (102.5 * (0.98 + Math.random()*0.04)).toFixed(1);
+    const geo = stress ? (0.65 + Math.random()*0.25).toFixed(2) : (Math.random()*0.15).toFixed(2);
+
+    const tier = lossPct >= 75 ? 4 : lossPct >= 55 ? 3 : lossPct >= 35 ? 2 : lossPct >= 20 ? 1 : null;
+    const rateMap = {1:0.50, 2:0.65, 3:0.75, 4:0.85};
+    const payoutAmt = tier ? Math.round(edi * rateMap[tier]) : 0;
+
+    const panel = document.getElementById('ariaPanel');
+    panel.innerHTML = [
+      { label:'Workability Score', val: workability+'/100', color: workability<50?'#ff4757':'#00d68f', sub: workability<50?'⚠ Below threshold':'✅ Safe to ride' },
+      { label:'EDI (Earnings Deficit)', val:'₹'+edi, color:'#ffd166', sub:'Expected ₹'+expectedEarnings+' · Got ₹'+actualEarnings },
+      { label:'Causation Score', val: Math.round(causation*100)+'%', color: parseFloat(causation)>=0.4?'#ff4757':'#3d8bff', sub: isSystemic?'✅ Systemic confirmed':'Individual factor' },
+      { label:'Fuel Price', val:'₹'+fuel+'/L', color: stress?'#ff4757':'#00d68f', sub: stress?'⛽ +12–22% Iran/Israel':'Baseline stable' },
+      { label:'Demand Index', val: stress?'48%':'83%', color: stress?'#ff4757':'#00d68f', sub: stress?'Severe collapse':'Normal demand' },
+      { label:'Geo-Political Stress', val: Math.round(geo*100)+'%', color: parseFloat(geo)>0.4?'#ff4757':'#3d8bff', sub: stress?'⚠ Conflict active':'Stable' },
+      ...(tier ? [{ label:'Auto-Payout Tier', val:'T'+tier+' · ₹'+payoutAmt, color:'#00d68f', sub: Math.round(rateMap[tier]*100)+'% of EDI · Zero-click' }] : [{ label:'Payout Status', val:'Not Triggered', color:'var(--muted)', sub:'Loss < 20% threshold' }]),
+    ].map(m => `
+      <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px;">
+        <div style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">${m.label}</div>
+        <div style="font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:800;color:${m.color};">${m.val}</div>
+        <div style="font-size:0.69rem;color:var(--muted);margin-top:4px;">${m.sub}</div>
+      </div>
+    `).join('');
+
+    // Also update gauge
+    const offset = 236 - (workability/100)*236;
+    const gaugePath = document.getElementById('gaugePath');
+    if (gaugePath) {
+      gaugePath.style.strokeDashoffset = offset;
+      document.getElementById('gaugeNum').textContent = workability;
+      const scoreTag = document.getElementById('scoreTag');
+      if (scoreTag) {
+        scoreTag.textContent = workability < 50 ? '⚠ AT RISK' : '● SAFE';
+        scoreTag.style.background = workability < 50 ? 'rgba(255,71,87,0.15)' : 'rgba(0,214,143,0.15)';
+        scoreTag.style.color = workability < 50 ? '#ff4757' : '#00d68f';
+      }
+      // Update conditions
+      if (document.getElementById('cRain')) {
+        document.getElementById('cRain').textContent = stress ? '28mm' : '2mm';
+        document.getElementById('cTemp').textContent = stress ? '38°C' : '31°C';
+        document.getElementById('cWind').textContent = stress ? '42km/h' : '14km/h';
+        document.getElementById('cAqi').textContent = stress ? '218' : '88';
+      }
+    }
+  }
+
+  window.toggleStress = function() {
+    stressActive = !stressActive;
+    const toggle = document.getElementById('stressToggle');
+    const thumb  = document.getElementById('stressThumb');
+    const label  = document.getElementById('stressLabel');
+    toggle.style.background = stressActive ? 'rgba(255,71,87,0.4)' : 'rgba(255,255,255,0.1)';
+    toggle.style.borderColor = stressActive ? 'rgba(255,71,87,0.6)' : 'rgba(255,255,255,0.15)';
+    thumb.style.left = stressActive ? '22px' : '2px';
+    thumb.style.background = stressActive ? '#ff4757' : '#7a8096';
+    label.textContent = stressActive ? '🚨 ACTIVE' : 'Off';
+    label.style.color = stressActive ? '#ff4757' : 'var(--muted)';
+    renderARIA(stressActive);
+  };
+
+  // initial render
+  renderARIA(false);
+
+  // Add ARIA link to sidebar
+  const sidebar = document.querySelector('.sidebar');
+  if (sidebar) {
+    const bottom = sidebar.querySelector('.sidebar-bottom');
+    const ariaLink = document.createElement('a');
+    ariaLink.href = '/';
+    ariaLink.className = 'nav-item';
+    ariaLink.innerHTML = '<span class="icon">🤖</span> ARIA Analytics';
+    ariaLink.style.color = '#ffd166';
+    sidebar.insertBefore(ariaLink, bottom);
+  }
+});
+</script>
